@@ -1,0 +1,260 @@
+<!DOCTYPE HTML>
+<!--
+	Solid State by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Walkthrough Cybersecurity - Portafolio</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Page Wrapper -->
+			<div id="page-wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<h1><a href="index.html">Portafolio</a></h1>
+						<nav>
+							<a href="#menu">Menú</a>
+						</nav>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<div class="inner">
+							<h2>Menú</h2>
+							<ul class="links">
+								<li><a href="index.html">Inicio</a></li>
+								<li><a href="walkthrough.html">Walkthrough Ciberseguridad</a></li>
+							</ul>
+							<a href="#" class="close">Cerrar</a>
+						</div>
+					</nav>
+
+				<!-- Wrapper -->
+					<section id="wrapper">
+						<header>
+							<div class="inner">
+								<h2>Walkthrough: Vulneración y Auditoría de Seguridad</h2>
+								<p>Ejercicio práctico de Análisis de Vulnerabilidades, Explotación y Escalada de Privilegios.</p>
+							</div>
+						</header>
+
+						<!-- Content -->
+							<div class="wrapper">
+								<div class="inner">
+
+									<!-- 1. INTRODUCCIÓN Y OBJETIVOS -->
+									<section>
+										<h3 class="major">1. Introducción y Objetivos del Proyecto</h3>
+										<p>
+											El presente proyecto consiste en la resolución metódica y documentada (<strong>Walkthrough</strong>) de un entorno controlado vulnerable de ciberseguridad. El objetivo principal es identificar, explotar y mitigar fallos de seguridad dentro del sistema objetivo, aplicando buenas prácticas de seguridad ofensiva (Red Teaming) y defensa (Blue Teaming).
+										</p>
+										<h4>Objetivos Específicos:</h4>
+										<ul>
+											<li>Identificar puertos abiertos, servicios activos y versiones vulnerables mediante reconocimiento activo.</li>
+											<li>Descubrir y analizar vectores de entrada para obtener un acceso inicial al sistema.</li>
+											<li>Realizar un proceso metódico de escalada de privilegios hasta alcanzar acceso de administrador/root.</li>
+											<li>Proponer recomendaciones técnicas detalladas para solucionar las vulnerabilidades encontradas.</li>
+										</ul>
+									</section>
+
+									<!-- 2. RECONOCIMIENTO Y ESCANEO -->
+									<section>
+										<h3 class="major">2. Fase de Reconocimiento y Escaneo</h3>
+										<p>
+											Se inició el análisis aplicando la metodología de reconocimiento de red para determinar el alcance del objetivo e identificar posibles puertos de entrada.
+										</p>
+										<h4>Comandos ejecutados (Nmap):</h4>
+										<pre><code># Escaneo rápido de puertos abiertos
+nmap -p- --open -sS --min-rate 5000 -n -pn 10.10.10.X -oN target_ports.txt
+
+# Escaneo detallado de versión y scripts por defecto
+nmap -sCV -p 22,80,443 10.10.10.X -oN target_services.txt</code></pre>
+
+										<h4>Resultados del Escaneo:</h4>
+										<div class="table-wrapper">
+											<table>
+												<thead>
+													<tr>
+														<th>Puerto</th>
+														<th>Estado</th>
+														<th>Servicio</th>
+														<th>Versión / Detalle</th>
+													</tr>
+												</thead>
+												<tbody>
+													<tr>
+														<td>22/TCP</td>
+														<td>Abierto</td>
+														<td>SSH</td>
+														<td>OpenSSH 8.2p1</td>
+													</tr>
+													<tr>
+														<td>80/TCP</td>
+														<td>Abierto</td>
+														<td>HTTP</td>
+														<td>Apache httpd 2.4.41</td>
+													</tr>
+													<tr>
+														<td>443/TCP</td>
+														<td>Abierto</td>
+														<td>HTTPS</td>
+														<td>Apache (Certificado SSL autofirmado)</td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+									</section>
+
+									<!-- 3. ENUMERACIÓN WEB Y EXPLOTACIÓN -->
+									<section>
+										<h3 class="major">3. Enumeración Web y Explotación Inicial</h3>
+										<p>
+											Al inspeccionar el servicio HTTP en el puerto 80, se procedió con la enumeración de directorios ocultos utilizando la herramienta <code>gobuster</code> / <code>ffuf</code>.
+										</p>
+										<pre><code>gobuster dir -u http://10.10.10.X/ -w /usr/share/wordlists/dirb/common.txt -x php,html,txt</code></pre>
+										
+										<p>
+											Se descubrió la ruta <code>/admin/upload.php</code>, la cual contenía un formulario de carga de archivos con validación insuficiente en el lado del servidor.
+										</p>
+										
+										<blockquote>
+											<strong>Vulnerabilidad identificada:</strong> Inyección / Arbitrary File Upload. La aplicación no filtraba adecuadamente las extensiones <code>.php</code>, permitiendo la carga de código arbitrario.
+										</blockquote>
+
+										<p>
+											Se preparó un payload en PHP para establecer una conexión en reversa (Reverse Shell) hacia nuestra máquina atacante:
+										</p>
+										<pre><code># Escucha en la máquina atacante
+nc -nlvp 4444</code></pre>
+										<p>
+											Tras ejecutar la petición con el archivo malicioso, se logró el primer acceso al sistema remoto bajo el contexto del usuario sin privilegios <code>www-data</code>.
+										</p>
+									</section>
+
+									<!-- 4. ESCALADA DE PRIVILEGIOS -->
+									<section>
+										<h3 class="major">4. Escalada de Privilegios</h3>
+										<p>
+											Con acceso inicial al sistema, se realizó una enumeración local para identificar configuraciones erróneas, tareas programadas (cron jobs) o binarios con permisos SUID.
+										</p>
+										<pre><code># Búsqueda de binarios con bit SUID activo
+find / -perm -4000 -type f 2>/dev/null</code></pre>
+										
+										<p>
+											Se detectó una tarea programada administrada por el usuario <code>root</code> que ejecutaba un script con permisos de escritura modificables por el grupo del usuario actual. Modificando el script e incluyendo una instrucción para otorgar permisos SUID a la terminal <code>/bin/bash</code>, se obtuvo acceso completo como superusuario.
+										</p>
+										<pre><code># Acceso root conseguido
+whoami
+# Output: root</code></pre>
+									</section>
+
+									<!-- 5. RECOMENDACIONES DE MITIGACIÓN -->
+									<section>
+										<h3 class="major">5. Conclusiones y Recomendaciones Técnicas</h3>
+										<p>
+											Para corregir las brechas encontradas y mejorar la postura de seguridad de la infraestructura, se sugieren las siguientes acciones remediadoras:
+										</p>
+										<div class="row">
+											<div class="col-6 col-12-medium">
+												<h4>Mitigación de Sanitización</h4>
+												<ul>
+													<li>Validar extensiones de archivos subidos utilizando listas blancas (Whitelist).</li>
+													<li>Almacenar archivos subidos fuera del directorio raíz web y deshabilitar la ejecución de scripts en esa ruta.</li>
+												</ul>
+											</div>
+											<div class="col-6 col-12-medium">
+												<h4>Mitigación de Privilegios</h4>
+												<ul>
+													<li>Aplicar el principio de menor privilegio (Principle of Least Privilege).</li>
+													<li>Restringir los permisos de escritura en scripts del sistema ejecutados por el usuario root.</li>
+												</ul>
+											</div>
+										</div>
+									</section>
+
+									<!-- ======================================================= -->
+									<!-- ESPACIO RESERVADO PARA EL VIDEO DEMOSTRATIVO -->
+									<!-- ======================================================= -->
+									<section>
+										<h3 class="major">6. Demostración en Video del Walkthrough</h3>
+										<p>En el siguiente reproductor se muestra el procedimiento paso a paso de la prueba de concepto (PoC):</p>
+
+										<!-- [INICIO ESPACIO VIDEO] -->
+										<div class="box alt">
+											<div class="video-container" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; display: flex; align-items: center; justify-content: center; border: 1px dashed #ffffff55; border-radius: 6px;">
+												<!-- REEMPLAZAR ESTE TEXTO O CONTENEDOR POR TU ETIQUETA <video> O <iframe src="URL_YOUTUBE"></iframe> -->
+												<p style="position: absolute; top: 45%; width: 100%; text-align: center; color: #888;">
+													<strong>video demostrativo</strong><br />
+													<em>Inserta aquí tu etiqueta &lt;iframe&gt; de YouTube/Vimeo o &lt;video src="..."&gt;&lt;/video&gt;</em>
+												</p>
+											</div>
+										</div>
+										<!-- [FIN ESPACIO VIDEO] -->
+									</section>
+
+									<!-- ======================================================= -->
+									<!-- ESPACIO RESERVADO PARA EL DOCUMENTO PDF -->
+									<!-- ======================================================= -->
+									<section>
+										<h3 class="major">7. Reporte Técnico Completo (PDF)</h3>
+										<p>Puedes consultar o descargar la documentación detallada y el reporte ejecutivo del ejercicio a continuación:</p>
+
+										<!-- [INICIO ESPACIO PDF] -->
+										<div class="box" style="border: 1px dashed #ffffff55; padding: 20px; text-align: center; background: rgba(255, 255, 255, 0.03);">
+											<h4>Visualizador del Reporte PDF</h4>
+											
+											<!-- Embed / Viewer para el PDF -->
+											<div style="width: 100%; height: 500px; background: #222; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+												<!-- REEMPLAZAR EL SRC CON LA RUTA DE TU ARCHIVO PDF (Ej: src="documentos/reporte.pdf") -->
+												<embed src="documentos/reporte_ejemplo.pdf" type="application/pdf" width="100%" height="100%" />
+											</div>
+
+											<ul class="actions fit">
+												<!-- REEMPLAZAR EL HREF POR LA RUTA REAL DE TU PDF PARA PERMITIR DESCARGA -->
+												<li><a href="documentos/reporte_ejemplo.pdf" download class="button primary icon solid fa-download">Descargar Reporte en PDF</a></li>
+											</ul>
+										</div>
+										<!-- [FIN ESPACIO PDF] -->
+									</section>
+
+								</div>
+							</div>
+
+					</section>
+
+				<!-- Footer -->
+					<section id="footer">
+						<div class="inner">
+							<h2 class="major">Contacto / Información</h2>
+							<p>Portafolio profesional desarrollado para la presentación de proyectos e investigaciones de ciberseguridad.</p>
+							<ul class="contact">
+								<li class="icon solid fa-envelope"><a href="#">contacto@correo.com</a></li>
+								<li class="icon brands fa-github"><a href="#">github.com/usuario</a></li>
+								<li class="icon brands fa-linkedin"><a href="#">linkedin.com/in/usuario</a></li>
+							</ul>
+							<ul class="copyright">
+								<li>&copy; Todos los derechos reservados.</li><li>Diseño: <a href="http://html5up.net">HTML5 UP</a></li>
+							</ul>
+						</div>
+					</section>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
