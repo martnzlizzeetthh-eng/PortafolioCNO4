@@ -101,9 +101,12 @@ input, select, textarea {
 	body {
 		background-color: #2e3141;
 		background-image: linear-gradient(to top, rgba(46, 49, 65, 0.8), rgba(46, 49, 65, 0.8)), url("../../images/bg.jpg");
-		background-size: auto, cover;
-		background-attachment: fixed, fixed;
-		background-position: center, center;
+		background-size: auto,
+ cover;
+		background-attachment: fixed,
+ fixed;
+		background-position: center,
+ center;
 	}
 
 		body.is-preload *, body.is-preload *:before, body.is-preload *:after {
@@ -3464,8 +3467,10 @@ input, select, textarea {
 				padding: 7em 0 8.25em 0 ;
 				background-color: #2e3141;
 				background-image: linear-gradient(to top, rgba(46, 49, 65, 0.8), rgba(46, 49, 65, 0.8)), url("../../images/bg.jpg");
-				background-size: auto, cover;
-				background-position: center, center;
+				background-size: auto,
+ cover;
+				background-position: center,
+ center;
 				margin-bottom: -6.5em;
 			}
 
@@ -3574,8 +3579,10 @@ input, select, textarea {
 			padding: 9em 0 6.25em 0 ;
 			background-color: #2e3141;
 			background-image: linear-gradient(to top, rgba(46, 49, 65, 0.8), rgba(46, 49, 65, 0.8)), url("../../images/bg.jpg");
-			background-size: auto, cover;
-			background-position: center, 0% 30%;
+			background-size: auto,
+ cover;
+			background-position: center,
+ 0% 30%;
 			margin-bottom: -6.5em;
 		}
 
@@ -3585,8 +3592,10 @@ input, select, textarea {
 
 		#wrapper > header {
 			padding: 11em 3em 7.375em 3em ;
-			background-size: auto, cover;
-			background-position: center, 0% 0%;
+			background-size: auto,
+ cover;
+			background-position: center,
+ 0% 0%;
 			margin-bottom: -4.75em;
 		}
 
@@ -3600,7 +3609,8 @@ input, select, textarea {
 
 		#wrapper > header {
 			padding: 6.5em 2em 3em 2em ;
-			background-size: auto, 125%;
+			background-size: auto,
+ 125%;
 			margin-bottom: -2.5em;
 		}
 
@@ -3795,10 +3805,10 @@ input, select, textarea {
 				-ms-flex: 1;
 			}
 
-				.wrapper.spotlight .image img {
-					border-radius: 100%;
-					width: 100%;
-				}
+			.wrapper.spotlight .image img {
+				border-radius: 100%;
+				width: 100%;
+			}
 
 			.wrapper.spotlight .content {
 				width: 100%;
@@ -4062,8 +4072,10 @@ input, select, textarea {
 		#footer {
 			background-color: #2e3141;
 			background-image: linear-gradient(to top, rgba(46, 49, 65, 0.8), rgba(46, 49, 65, 0.8)), url("../../images/bg.jpg");
-			background-size: auto, cover;
-			background-position: center, center;
+			background-size: auto,
+ cover;
+			background-position: center,
+ center;
 			margin-top: -6.5em;
 			padding-top: 6.5em;
 		}
@@ -4142,3 +4154,164 @@ input, select, textarea {
 		}
 
 	}
+
+	/* Road to Hall of Fame - Roadmap Styles */
+
+.roadmap-container {
+	position: relative;
+	margin: 3em 0 1em 0;
+	padding: 1em 0;
+}
+
+.roadmap-timeline {
+	position: relative;
+	max-width: 900px;
+	margin: 0 auto;
+}
+
+.roadmap-timeline::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 28px;
+	width: 4px;
+	background: rgba(255, 255, 255, 0.15);
+	border-radius: 2px;
+}
+
+.roadmap-item {
+	position: relative;
+	display: flex;
+	align-items: flex-start;
+	margin-bottom: 2.5em;
+}
+
+.roadmap-item:last-child {
+	margin-bottom: 0;
+}
+
+.roadmap-marker {
+	position: relative;
+	z-index: 2;
+	width: 60px;
+	height: 60px;
+	border-radius: 50%;
+	background: #2e3141;
+	border: 3px solid rgba(255, 255, 255, 0.2);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.3em;
+	color: #ffffff;
+	flex-shrink: 0;
+	transition: all 0.3s ease;
+}
+
+.roadmap-item.completed .roadmap-marker {
+	border-color: #4caf50;
+	background: #354a3a;
+	color: #81c784;
+	box-shadow: 0 0 12px rgba(76, 175, 80, 0.4);
+}
+
+.roadmap-item.in-progress .roadmap-marker {
+	border-color: #ffb74d;
+	background: #4a3e2e;
+	color: #ffe082;
+	box-shadow: 0 0 12px rgba(255, 183, 77, 0.4);
+}
+
+.roadmap-item.pending .roadmap-marker {
+	border-color: rgba(255, 255, 255, 0.2);
+	background: #252836;
+	color: rgba(255, 255, 255, 0.4);
+}
+
+.roadmap-item.goal .roadmap-marker {
+	border-color: #ba68c8;
+	background: #412e4a;
+	color: #e1bee7;
+	box-shadow: 0 0 15px rgba(186, 104, 200, 0.5);
+}
+
+.roadmap-content {
+	margin-left: 2em;
+	background: rgba(255, 255, 255, 0.03);
+	border: 2px solid rgba(255, 255, 255, 0.1);
+	border-radius: 8px;
+	padding: 1.5em 2em;
+	flex-grow: 1;
+	position: relative;
+	transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.roadmap-content:hover {
+	border-color: rgba(255, 255, 255, 0.25);
+	transform: translateY(-2px);
+}
+
+.roadmap-badge {
+	display: inline-block;
+	padding: 0.25em 0.8em;
+	font-size: 0.7em;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	border-radius: 4px;
+	margin-bottom: 1em;
+	background: rgba(76, 175, 80, 0.2);
+	color: #81c784;
+	border: 1px solid rgba(76, 175, 80, 0.4);
+}
+
+.roadmap-badge.status-progress {
+	background: rgba(255, 183, 77, 0.2);
+	color: #ffe082;
+	border-color: rgba(255, 183, 77, 0.4);
+}
+
+.roadmap-badge.status-pending {
+	background: rgba(255, 255, 255, 0.05);
+	color: rgba(255, 255, 255, 0.5);
+	border-color: rgba(255, 255, 255, 0.15);
+}
+
+.roadmap-badge.status-goal {
+	background: rgba(186, 104, 200, 0.2);
+	color: #e1bee7;
+	border-color: rgba(186, 104, 200, 0.4);
+}
+
+.roadmap-content h3.major {
+	font-size: 1.1em;
+	margin-bottom: 0.8em;
+	padding-bottom: 0.5em;
+}
+
+.roadmap-content p {
+	font-size: 0.95em;
+	margin-bottom: 1.2em;
+	line-height: 1.6;
+}
+
+.roadmap-content a.special {
+	margin-bottom: 0;
+}
+
+@media screen and (max-width: 736px) {
+	.roadmap-timeline::before {
+		left: 20px;
+	}
+
+	.roadmap-marker {
+		width: 44px;
+		height: 44px;
+		font-size: 1em;
+	}
+
+	.roadmap-content {
+		margin-left: 1em;
+		padding: 1.2em 1.2em;
+	}
+}
