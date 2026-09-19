@@ -1,0 +1,194 @@
+<!DOCTYPE HTML>
+<!--
+	Solid State by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Lab: File Path Traversal (Simple Case) - PortSwigger</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Page Wrapper -->
+			<div id="page-wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<h1><a href="index.html">UPSLP</a></h1>
+						<nav>
+							<a href="#menu">Menú</a>
+						</nav>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<div class="inner">
+							<h2>Menú</h2>
+							<ul class="links">
+								<li><a href="index.html">Inicio</a></li>
+								<li><a href="proyecto1.html">Práctica / Laboratorio 1</a></li>
+								<li><a href="index.html#road-to-hall-of-fame">Road to Hall of Fame</a></li>
+							</ul>
+							<a href="#" class="close">Cerrar</a>
+						</div>
+					</nav>
+
+				<!-- Wrapper -->
+					<section id="wrapper">
+						<header>
+							<div class="inner">
+								<h2>File Path Traversal - Simple Case</h2>
+								<p>Laboratorio Práctico de PortSwigger Web Security Academy</p>
+							</div>
+						</header>
+
+						<!-- Content -->
+							<div class="wrapper">
+								<div class="inner">
+
+									<!-- 01. MARCO TEÓRICO Y FUNDAMENTACIÓN TÉCNICA -->
+									<section>
+										<h3 class="major">01. Marco Teórico y Fundamentación Técnica</h3>
+										<p>
+											<strong>File Path Traversal</strong> (también conocido como <em>Directory Traversal</em>) es una vulnerabilidad de seguridad web que permite a un atacante leer archivos arbitrarios almacenados en el sistema de archivos del servidor donde se ejecuta la aplicación.
+										</p>
+										
+										<div class="row">
+											<div class="col-6 col-12-medium">
+												<h4>Mecanismo de la Vulnerabilidad</h4>
+												<p>
+													Ocurre cuando una aplicación web utiliza parámetros proporcionados por el usuario para construir rutas a archivos locales en el servidor (como imágenes o documentos) sin la debida sanitización o validación por lista blanca. 
+												</p>
+												<p>
+													Mediante secuencias de escape de directorios como <code>../</code> (dot-dot-slash), el atacante puede navegar hacia arriba en el árbol de directorios del sistema operativo hasta alcanzar la raíz (<code>/</code>) y acceder a archivos sensibles del sistema como <code>/etc/passwd</code>.
+												</p>
+											</div>
+											<div class="col-6 col-12-medium">
+												<h4>Impacto (Triada CIA y OWASP)</h4>
+												<ul>
+													<li><strong>A01:2021 - Broken Access Control (OWASP Top 10):</strong> Falla directa en el control de acceso a recursos del sistema de archivos.</li>
+													<li><strong>Confidencialidad:</strong> Pérdida crítica al exponer código fuente, credenciales, claves de configuración y archivos del SO.</li>
+													<li><strong>Principio de Defensa:</strong> Evitar pasar rutas de archivos directamente desde parámetros de usuario; utilizar IDs mapeados o nombres de archivo validados estrictamente.</li>
+												</ul>
+											</div>
+										</div>
+									</section>
+
+									<!-- 02. PROCEDIMIENTO TÉCNICO EN BURP SUITE -->
+									<section>
+										<h3 class="major">02. Procedimiento Técnico y Uso de Burp Suite</h3>
+										<p>
+											A continuación se detalla el procedimiento paso a paso para identificar y explotar la vulnerabilidad en el entorno del laboratorio de PortSwigger:
+										</p>
+										<ol>
+											<li><strong>Intercepción de Petición:</strong> Se accede a la aplicación objetivo y se activa <em>Burp Proxy Intercept</em> al cargar una de las imágenes de los productos en la tienda.</li>
+											<li><strong>Análisis del Parámetro Vulnerable:</strong> Se observa que las imágenes son solicitadas a través de la ruta <code>/image?filename=21.jpg</code>.</li>
+											<li><strong>Transferencia a Repeater:</strong> Se envía la petición GET a <em>Burp Repeater</em> mediante la combinación <code>Ctrl + R</code> para realizar pruebas iterativas.</li>
+											<li><strong>Manipulación del Payload:</strong> Se modifica el valor del parámetro <code>filename</code> reemplazando la imagen por la secuencia de retroceso de directorio hacia el archivo sensible: <code>../../../etc/passwd</code>.</li>
+											<li><strong>Análisis de la Respuesta:</strong> Se envía la petición y se verifica en la pestaña de respuesta (Response) que el servidor devuelve el contenido del archivo <code>/etc/passwd</code> con un código de estado <code>HTTP 200 OK</code>.</li>
+										</ol>
+									</section>
+
+									<hr />
+
+									<!-- 03. DOCUMENTACIÓN DEL LABORATORIO -->
+									<h2 class="major" style="margin-top: 2em;">03. Documentación Técnica del Laboratorio</h2>
+
+									<section class="box" style="background: rgba(255, 255, 255, 0.02); border-left: 4px solid #4caf50; margin-bottom: 3em;">
+										<h3 class="major">Lab: File path traversal, simple case</h3>
+										<p>
+											<strong>URL del Laboratorio:</strong> <a href="https://portswigger.net/web-security/file-path-traversal/lab-simple" target="_blank">PortSwigger Web Security Academy - Simple Case</a>
+										</p>
+
+										<h4>Alteración de la Petición HTTP:</h4>
+										<pre><code>-- Petición Original:
+GET /image?filename=21.jpg HTTP/1.1
+Host: lab-id.web-security-academy.net
+
+-- Petición Alterada con Payload:
+GET /image?filename=../../../etc/passwd HTTP/1.1
+Host: lab-id.web-security-academy.net</code></pre>
+
+										<h4>Explicación Técnica del Payload:</h4>
+										<blockquote style="border-left-color: #4caf50;">
+											<strong>Payload:</strong> <code>../../../etc/passwd</code><br />
+											Cada secuencia <code>../</code> sube un nivel en el árbol de directorios desde la ubicación predeterminada del almacenamiento de imágenes (por ejemplo, <code>/var/www/images/</code>). Tres secuencias consecutivas conducen hasta el directorio raíz (<code>/</code>), permitiendo a la aplicación abrir y retornar el archivo de cuentas del sistema Linux (<code>/etc/passwd</code>).
+										</blockquote>
+
+										<h4>Evidencias y Capturas de Pantalla:</h4>
+										<div class="row gtr-uniform">
+											<!-- Captura Request / Payload -->
+											<div class="col-6 col-12-medium">
+												<span class="image fit">
+													<!-- REEMPLAZAR CON TU IMAGEN -->
+													<img src="images/path_traversal_request.png" alt="Captura Request Burp Suite" style="border: 1px solid rgba(255,255,255,0.2);" />
+												</span>
+												<p style="font-size: 0.85em; text-align: center; color: #aaa;">Fig 1.1: Interceptación de la petición e inyección del payload <code>../../../etc/passwd</code> en Burp Repeater.</p>
+											</div>
+
+											<!-- Captura Response / Lab Solved -->
+											<div class="col-6 col-12-medium">
+												<span class="image fit">
+													<!-- REEMPLAZAR CON TU IMAGEN -->
+													<img src="images/path_traversal_solved.png" alt="Captura Respuesta y Lab Solved" style="border: 1px solid rgba(255,255,255,0.2);" />
+												</span>
+												<p style="font-size: 0.85em; text-align: center; color: #aaa;">Fig 1.2: Lectura exitosa del contenido del archivo <code>/etc/passwd</code> y confirmación "Lab Solved".</p>
+											</div>
+										</div>
+									</section>
+
+									<!-- 04. REPORTE TÉCNICO COMPLETO (PDF) -->
+									<section>
+										<h3 class="major">04. Documentación Adjunta (PDF)</h3>
+										<p>A continuación se habilita el visor y la descarga del reporte completo del laboratorio:</p>
+
+										<div class="box" style="border: 1px dashed rgba(255, 255, 255, 0.3); padding: 20px; text-align: center; background: rgba(255, 255, 255, 0.03);">
+											<div style="width: 100%; height: 500px; background: #1b1e2b; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+												<!-- REEMPLAZAR CON LA RUTA DE TU PDF -->
+												<embed src="documentos/path_traversal_lab.pdf" type="application/pdf" width="100%" height="100%" />
+											</div>
+
+											<ul class="actions fit">
+												<li><a href="documentos/path_traversal_lab.pdf" download class="button primary icon solid fa-download">Descargar Reporte en PDF</a></li>
+											</ul>
+										</div>
+									</section>
+
+								</div>
+							</div>
+
+					</section>
+
+				<!-- Footer -->
+					<section id="footer">
+						<div class="inner">
+							<h2 class="major">Contacto / Información Académica</h2>
+							<p>Portafolio desarrollado para la materia CNO IV: Seguridad Informática | UPSLP.</p>
+							<ul class="contact">
+								<li class="icon solid fa-user">Lizeth Infante Martinez</li>
+								<li class="icon solid fa-university">Universidad Politécnica de San Luis Potosí</li>
+								<li class="icon solid fa-envelope"><a href="#">contacto@upslp.edu.mx</a></li>
+							</ul>
+							<ul class="copyright">
+								<li>&copy; Todos los derechos reservados.</li><li>Diseño: <a href="http://html5up.net">HTML5 UP</a></li>
+							</ul>
+						</div>
+					</section>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
