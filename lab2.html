@@ -1,0 +1,191 @@
+<!DOCTYPE HTML>
+<!--
+	Solid State by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Lab: File Path Traversal (Absolute Path Bypass) - PortSwigger</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Page Wrapper -->
+			<div id="page-wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<h1><a href="index.html">UPSLP</a></h1>
+						<nav>
+							<a href="#menu">Menú</a>
+						</nav>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<div class="inner">
+							<h2>Menú</h2>
+							<ul class="links">
+								<li><a href="index.html">Inicio</a></li>
+								<li><a href="proyecto1.html">Práctica / Laboratorio 1</a></li>
+								<li><a href="index.html#road-to-hall-of-fame">Road to Hall of Fame</a></li>
+							</ul>
+							<a href="#" class="close">Cerrar</a>
+						</div>
+					</nav>
+
+				<!-- Wrapper -->
+					<section id="wrapper">
+						<header>
+							<div class="inner">
+								<h2>File Path Traversal - Absolute Path Bypass</h2>
+								<p>Laboratorio Práctico de PortSwigger Web Security Academy</p>
+							</div>
+						</header>
+
+						<!-- Content -->
+							<div class="wrapper">
+								<div class="inner">
+
+									<!-- 01. MARCO TEÓRICO Y FUNDAMENTACIÓN TÉCNICA -->
+									<section>
+										<h3 class="major">01. Marco Teórico y Fundamentación Técnica</h3>
+										<p>
+											<strong>File Path Traversal mediante Bypass de Ruta Absoluta</strong> es una variante de Directory Traversal en la cual la aplicación intenta bloquear o sanitizar secuencias relativas como <code>../</code>, pero falla al no validar el uso de rutas absolutas completas del sistema operativo.
+										</p>
+										
+										<div class="row">
+											<div class="col-6 col-12-medium">
+												<h4>Mecanismo de la Vulnerabilidad</h4>
+												<p>
+													Muchas aplicaciones implementan filtros sencillos para mitigar Path Traversal detectando y bloqueando patrones de navegación relativa (<code>../</code> o <code>..\</code>). Sin embargo, si el código subyacente pasa el valor del parámetro directamente a funciones de lectura de archivos (como <code>file_get_contents</code> o <code>open()</code>) que aceptan rutas absolutas, el filtro relativo es completamente inefectivo.
+												</p>
+												<p>
+													Al enviar una ruta absoluta directa como <code>/etc/passwd</code>, el sistema de archivos del servidor resuelve la dirección desde el directorio raíz directamente, ignorando la necesidad de retroceder niveles en el árbol de directorios.
+												</p>
+											</div>
+											<div class="col-6 col-12-medium">
+												<h4>Impacto (Triada CIA y OWASP)</h4>
+												<ul>
+													<li><strong>A01:2021 - Broken Access Control (OWASP Top 10):</strong> Bypass de defensas perimetrales e ineficiencia en la validación de entradas.</li>
+													<li><strong>Confidencialidad:</strong> Acceso no autorizado a archivos sensibles del sistema operativo mediante rutas directas.</li>
+													<li><strong>Principio de Defensa:</strong> Implementar listas blancas estrictas de nombres de archivo permitidos o resolver y verificar mediante canonicidad que la ruta final permanezca dentro del directorio base autorizado (e.g., <code>canonicalPath.startsWith(baseDir)</code>).</li>
+												</ul>
+											</div>
+										</div>
+									</section>
+
+									<!-- 02. PROCEDIMIENTO TÉCNICO EN BURP SUITE -->
+									<section>
+										<h3 class="major">02. Procedimiento Técnico y Uso de Burp Suite</h3>
+										<p>
+											A continuación se detalla el procedimiento paso a paso para identificar y explotar el bypass de ruta absoluta en la aplicación:
+										</p>
+										<ol>
+											<li><strong>Intercepción de Petición:</strong> Se navega por la tienda virtual y se intercepta la petición HTTP enviada al cargar una imagen de producto a través de <em>Burp Proxy Intercept</em>.</li>
+											<li><strong>Identificación del Parámetro:</strong> Se observa la petición <code>GET /image?filename=53.jpg</code> y se envía a <em>Burp Repeater</em> (<code>Ctrl + R</code>).</li>
+											<li><strong>Prueba de Traversal Relativo (Bloqueado):</strong> Al intentar usar <code>../../../etc/passwd</code>, la aplicación responde con un error o bloquea la petición debido a la presencia de secuencias <code>../</code>.</li>
+											<li><strong>Evasión con Ruta Absoluta:</strong> Se modifica el parámetro <code>filename</code> asignando directamente la ruta absoluta del archivo objetivo: <code>/etc/passwd</code>.</li>
+											<li><strong>Confirmación de la Explotación:</strong> Al enviar la petición modificada, el servidor procesa la ruta absoluta directamente y retorna el contenido de <code>/etc/passwd</code> en el cuerpo de la respuesta HTTP con estado <code>200 OK</code>.</li>
+										</ol>
+									</section>
+
+									<hr />
+
+									<!-- 03. DOCUMENTACIÓN DEL LABORATORIO -->
+									<h2 class="major" style="margin-top: 2em;">03. Documentación Técnica del Laboratorio</h2>
+
+									<section class="box" style="background: rgba(255, 255, 255, 0.02); border-left: 4px solid #4caf50; margin-bottom: 3em;">
+										<h3 class="major">Lab: File path traversal, traversal sequences blocked with absolute path bypass</h3>
+										<p>
+											<strong>URL del Laboratorio:</strong> <a href="https://portswigger.net/web-security/file-path-traversal/lab-absolute-path-bypass" target="_blank">PortSwigger Web Security Academy - Absolute Path Bypass</a>
+										</p>
+
+										<h4>Alteración de la Petición HTTP:</h4>
+										<pre><code>-- Petición Original:
+GET /image?filename=53.jpg HTTP/1.1
+Host: lab-id.web-security-academy.net
+
+-- Petición Alterada con Payload (Ruta Absoluta):
+GET /image?filename=/etc/passwd HTTP/1.1
+Host: lab-id.web-security-academy.net</code></pre>
+
+										<h4>Explicación Técnica del Payload:</h4>
+										<blockquote style="border-left-color: #4caf50;">
+											<strong>Payload:</strong> <code>/etc/passwd</code><br />
+											Debido a que la aplicación bloquea específicamente las secuencias de retroceso relativo (<code>../</code>), el payload utiliza la ruta absoluta directa. Dado que el parámetro del usuario es tratado directamente por el sistema de archivos sin verificar si es relativo o absoluto, la raíz <code>/</code> sobreescribe cualquier prefijo de directorio implícito y accede de forma directa al archivo del sistema.
+										</blockquote>
+
+										<h4>Evidencias y Capturas de Pantalla:</h4>
+										<div class="row gtr-uniform">
+											<!-- Captura Request / Payload -->
+											<div class="col-6 col-12-medium">
+												<span class="image fit">
+													<img src="images/path_traversal_absolute_request.png" alt="Captura Request Burp Suite Absolute Path" style="border: 1px solid rgba(255,255,255,0.2);" />
+												</span>
+												<p style="font-size: 0.85em; text-align: center; color: #aaa;">Fig 1.1: Interceptación e inyección del payload absoluto <code>/etc/passwd</code> en Burp Repeater.</p>
+											</div>
+
+											<!-- Captura Response / Lab Solved -->
+											<div class="col-6 col-12-medium">
+												<span class="image fit">
+													<img src="images/path_traversal_absolute_solved.png" alt="Captura Respuesta y Lab Solved" style="border: 1px solid rgba(255,255,255,0.2);" />
+												</span>
+												<p style="font-size: 0.85em; text-align: center; color: #aaa;">Fig 1.2: Lectura exitosa del contenido del archivo <code>/etc/passwd</code> y confirmación "Lab Solved".</p>
+											</div>
+										</div>
+									</section>
+
+									<!-- 04. REPORTE TÉCNICO COMPLETO (PDF) -->
+									<section>
+										<h3 class="major">04. Documentación Adjunta (PDF)</h3>
+										<p>A continuación se habilita el visor y la descarga del reporte completo del laboratorio:</p>
+
+										<div class="box" style="border: 1px dashed rgba(255, 255, 255, 0.3); padding: 20px; text-align: center; background: rgba(255, 255, 255, 0.03);">
+											<div style="width: 100%; height: 500px; background: #1b1e2b; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+												<embed src="documentos/path_traversal_absolute_lab.pdf" type="application/pdf" width="100%" height="100%" />
+											</div>
+
+											<ul class="actions fit">
+												<li><a href="documentos/path_traversal_absolute_lab.pdf" download class="button primary icon solid fa-download">Descargar Reporte en PDF</a></li>
+											</ul>
+										</div>
+									</section>
+
+								</div>
+							</div>
+
+					</section>
+
+				<!-- Footer -->
+					<section id="footer">
+						<div class="inner">
+							<h2 class="major">Contacto / Información Académica</h2>
+							<p>Portafolio desarrollado para la materia CNO IV: Seguridad Informática | UPSLP.</p>
+							<ul class="contact">
+								<li class="icon solid fa-user">Lizeth Infante Martinez</li>
+								<li class="icon solid fa-university">Universidad Politécnica de San Luis Potosí</li>
+								<li class="icon solid fa-envelope"><a href="#">contacto@upslp.edu.mx</a></li>
+							</ul>
+							<ul class="copyright">
+								<li>&copy; Todos los derechos reservados.</li><li>Diseño: <a href="http://html5up.net">HTML5 UP</a></li>
+							</ul>
+						</div>
+					</section>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
