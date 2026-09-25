@@ -1,0 +1,191 @@
+<!DOCTYPE HTML>
+<!--
+	Solid State by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Lab: File Path Traversal (Sequences Stripped Non-Recursively) - PortSwigger</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Page Wrapper -->
+			<div id="page-wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<h1><a href="index.html">UPSLP</a></h1>
+						<nav>
+							<a href="#menu">Menú</a>
+						</nav>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<div class="inner">
+							<h2>Menú</h2>
+							<ul class="links">
+								<li><a href="index.html">Inicio</a></li>
+								<li><a href="proyecto1.html">Práctica / Laboratorio 1</a></li>
+								<li><a href="index.html#road-to-hall-of-fame">Road to Hall of Fame</a></li>
+							</ul>
+							<a href="#" class="close">Cerrar</a>
+						</div>
+					</nav>
+
+				<!-- Wrapper -->
+					<section id="wrapper">
+						<header>
+							<div class="inner">
+								<h2>File Path Traversal - Traversal Sequences Stripped Non-Recursively</h2>
+								<p>Laboratorio Práctico de PortSwigger Web Security Academy</p>
+							</div>
+						</header>
+
+						<!-- Content -->
+							<div class="wrapper">
+								<div class="inner">
+
+									<!-- 01. MARCO TEÓRICO Y FUNDAMENTACIÓN TÉCNICA -->
+									<section>
+										<h3 class="major">01. Marco Teórico y Fundamentación Técnica</h3>
+										<p>
+											<strong>File Path Traversal mediante Eliminación No Recursiva</strong> es una técnica de evasión de filtros en la que la aplicación intenta sanitizar la entrada del usuario eliminando las secuencias de navegación relativa (como <code>../</code>) mediante un reemplazo simple de cadenas, pero comete el error de no aplicarlo de forma recursiva.
+										</p>
+										
+										<div class="row">
+											<div class="col-6 col-12-medium">
+												<h4>Mecanismo de la Vulnerabilidad</h4>
+												<p>
+													Cuando un filtro de seguridad simplemente busca la secuencia <code>../</code> y la reemplaza por una cadena vacía una sola vez (por ejemplo, con un <code>replace("../", "")</code> básico), es posible eludir la protección anidando las secuencias.
+												</p>
+												<p>
+													Al enviar la secuencia <code>....//</code>, el filtro elimina la cadena <code>../</code> central, provocando que los caracteres restantes (<code>..</code> a la izquierda y <code>/</code> a la derecha) se unan automáticamente, reconstruyendo de nuevo la secuencia <code>../</code> antes de pasar la ruta al sistema de archivos.
+												</p>
+											</div>
+											<div class="col-6 col-12-medium">
+												<h4>Impacto (Triada CIA y OWASP)</h4>
+												<ul>
+													<li><strong>A01:2021 - Broken Access Control (OWASP Top 10):</strong> Ineficacia en la sanitización de entradas que conduce a la evasión de mecanismos de control de acceso.</li>
+													<li><strong>Confidencialidad:</strong> Permite la lectura no autorizada de archivos del sistema como <code>/etc/passwd</code> mediante la manipulación de secuencias anidadas.</li>
+													<li><strong>Principio de Defensa:</strong> Evitar la sanitización manual basada en eliminación de cadenas. En su lugar, se deben usar identificadores fijos, listas blancas o resolver el camino canónico y validar que permanezca en el directorio raíz permitido.</li>
+												</ul>
+											</div>
+										</div>
+									</section>
+
+									<!-- 02. PROCEDIMIENTO TÉCNICO EN BURP SUITE -->
+									<section>
+										<h3 class="major">02. Procedimiento Técnico y Uso de Burp Suite</h3>
+										<p>
+											A continuación se detalla el procedimiento paso a paso para identificar y explotar el bypass de sanitización no recursiva:
+										</p>
+										<ol>
+											<li><strong>Intercepción de Petición:</strong> Se navega por la tienda de aplicaciones y se intercepta con <em>Burp Proxy</em> la solicitud GET enviada para cargar la imagen de un producto.</li>
+											<li><strong>Transferencia a Repeater:</strong> Se envía la petición <code>GET /image?filename=...</code> a <em>Burp Repeater</em> (<code>Ctrl + R</code>) para pruebas iterativas.</li>
+											<li><strong>Prueba de Traversal Básico (Bloqueado/Sanitizado):</strong> Al inyectar <code>../../../etc/passwd</code>, la aplicación elimina las secuencias <code>../</code> devolviendo un error de archivo no encontrado al intentar cargar <code>etc/passwd</code>.</li>
+											<li><strong>Inyección del Payload Anidado:</strong> Se modifica el parámetro <code>filename</code> reemplazando cada <code>../</code> por la secuencia anidada <code>....//</code>, quedando como payload: <code>....//....//....//etc/passwd</code>.</li>
+											<li><strong>Confirmación de Explotación:</strong> Al enviar la petición, el filtro elimina la porción central de cada bloque y reconstruye la ruta <code>../../../etc/passwd</code>, devolviendo con éxito el contenido del archivo <code>/etc/passwd</code> y la respuesta <code>200 OK</code>.</li>
+										</ol>
+									</section>
+
+									<hr />
+
+									<!-- 03. DOCUMENTACIÓN DEL LABORATORIO -->
+									<h2 class="major" style="margin-top: 2em;">03. Documentación Técnica del Laboratorio</h2>
+
+									<section class="box" style="background: rgba(255, 255, 255, 0.02); border-left: 4px solid #4caf50; margin-bottom: 3em;">
+										<h3 class="major">Lab: File path traversal, traversal sequences stripped non-recursively</h3>
+										<p>
+											<strong>URL del Laboratorio:</strong> <a href="https://portswigger.net/web-security/file-path-traversal/lab-sequences-stripped-non-recursively" target="_blank">PortSwigger Web Security Academy - Sequences Stripped Non-Recursively</a>
+										</p>
+
+										<h4>Alteración de la Petición HTTP:</h4>
+										<pre><code>-- Petición Original:
+GET /image?filename=54.jpg HTTP/1.1
+Host: lab-id.web-security-academy.net
+
+-- Petición Alterada con Payload (Secuencias Anidadas):
+GET /image?filename=....//....//....//etc/passwd HTTP/1.1
+Host: lab-id.web-security-academy.net</code></pre>
+
+										<h4>Explicación Técnica del Payload:</h4>
+										<blockquote style="border-left-color: #4caf50;">
+											<strong>Payload:</strong> <code>....//....//....//etc/passwd</code><br />
+											La aplicación procesa la entrada ejecutando un reemplazo simple no recursivo: sustituye cada coincidencia de <code>../</code> por una cadena vacía. Al procesar <code>....//</code>, se extrae el patrón <code>../</code> del medio, juntando los caracteres sobrantes (<code>..</code> + <code>/</code>) para formar nuevamente <code>../</code>. Así, tras el paso del filtro, la ruta final evaluada por el servidor se convierte en <code>../../../etc/passwd</code>.
+										</blockquote>
+
+										<h4>Evidencias y Capturas de Pantalla:</h4>
+										<div class="row gtr-uniform">
+											<!-- Captura Request / Payload -->
+											<div class="col-6 col-12-medium">
+												<span class="image fit">
+													<img src="images/path_traversal_stripped_request.png" alt="Captura Request Burp Suite Stripped Non-Recursively" style="border: 1px solid rgba(255,255,255,0.2);" />
+												</span>
+												<p style="font-size: 0.85em; text-align: center; color: #aaa;">Fig 1.1: Interceptación e inyección del payload anidado <code>....//....//....//etc/passwd</code> en Burp Repeater.</p>
+											</div>
+
+											<!-- Captura Response / Lab Solved -->
+											<div class="col-6 col-12-medium">
+												<span class="image fit">
+													<img src="images/path_traversal_stripped_solved.png" alt="Captura Respuesta y Lab Solved" style="border: 1px solid rgba(255,255,255,0.2);" />
+												</span>
+												<p style="font-size: 0.85em; text-align: center; color: #aaa;">Fig 1.2: Lectura exitosa del archivo <code>/etc/passwd</code> tras el procesamiento del filtro y confirmación "Lab Solved".</p>
+											</div>
+										</div>
+									</section>
+
+									<!-- 04. REPORTE TÉCNICO COMPLETO (PDF) -->
+									<section>
+										<h3 class="major">04. Documentación Adjunta (PDF)</h3>
+										<p>A continuación se habilita el visor y la descarga del reporte completo del laboratorio:</p>
+
+										<div class="box" style="border: 1px dashed rgba(255, 255, 255, 0.3); padding: 20px; text-align: center; background: rgba(255, 255, 255, 0.03);">
+											<div style="width: 100%; height: 500px; background: #1b1e2b; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+												<embed src="documentos/path_traversal_stripped_lab.pdf" type="application/pdf" width="100%" height="100%" />
+											</div>
+
+											<ul class="actions fit">
+												<li><a href="documentos/path_traversal_stripped_lab.pdf" download class="button primary icon solid fa-download">Descargar Reporte en PDF</a></li>
+											</ul>
+										</div>
+									</section>
+
+								</div>
+							</div>
+
+					</section>
+
+				<!-- Footer -->
+					<section id="footer">
+						<div class="inner">
+							<h2 class="major">Contacto / Información Académica</h2>
+							<p>Portafolio desarrollado para la materia CNO IV: Seguridad Informática | UPSLP.</p>
+							<ul class="contact">
+								<li class="icon solid fa-user">Lizeth Infante Martinez</li>
+								<li class="icon solid fa-university">Universidad Politécnica de San Luis Potosí</li>
+								<li class="icon solid fa-envelope"><a href="#">contacto@upslp.edu.mx</a></li>
+							</ul>
+							<ul class="copyright">
+								<li>&copy; Todos los derechos reservados.</li><li>Diseño: <a href="http://html5up.net">HTML5 UP</a></li>
+							</ul>
+						</div>
+					</section>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
