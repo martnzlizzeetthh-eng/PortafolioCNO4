@@ -1,0 +1,193 @@
+<!DOCTYPE HTML>
+<!--
+	Solid State by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Lab: File Path Traversal (Validation of Start of Path) - PortSwigger</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Page Wrapper -->
+			<div id="page-wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<h1><a href="index.html">UPSLP</a></h1>
+						<nav>
+							<a href="#menu">Menú</a>
+						</nav>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<div class="inner">
+							<h2>Menú</h2>
+							<ul class="links">
+								<li><a href="index.html">Inicio</a></li>
+								<li><a href="proyecto1.html">Práctica / Laboratorio 1</a></li>
+								<li><a href="index.html#road-to-hall-of-fame">Road to Hall of Fame</a></li>
+							</ul>
+							<a href="#" class="close">Cerrar</a>
+						</div>
+					</nav>
+
+				<!-- Wrapper -->
+					<section id="wrapper">
+						<header>
+							<div class="inner">
+								<h2>File Path Traversal - Validation of Start of Path</h2>
+								<p>Laboratorio Práctico de PortSwigger Web Security Academy</p>
+							</div>
+						</header>
+
+						<!-- Content -->
+							<div class="wrapper">
+								<div class="inner">
+
+									<!-- 01. MARCO TEÓRICO Y FUNDAMENTACIÓN TÉCNICA -->
+									<section>
+										<h3 class="major">01. Marco Teórico y Fundamentación Técnica</h3>
+										<p>
+											<strong>File Path Traversal con Validación del Inicio de la Ruta</strong> ocurre cuando una aplicación intenta mitigar ataques de salto de directorio verificando estricta y únicamente que el parámetro suministrado comience con una ruta prefijada autorizada (por ejemplo, <code>/var/www/images/</code>).
+										</p>
+										
+										<div class="row">
+											<div class="col-6 col-12-medium">
+												<h4>Mecanismo de la Vulnerabilidad</h4>
+												<p>
+													La falla radica en asumir que porque la entrada inicia con la ruta esperada, el acceso está restringido a esa carpeta. El filtro no valida lo que ocurre en el resto de la cadena.
+												</p>
+												<p>
+													Un atacante puede cumplir la condición requerida incluyendo la ruta inicial requerida y agregando inmediatamente secuencias de retroceso <code>../</code>. De esta forma, se satisface la comprobación de prefijo, pero el sistema operativo navega hacia afuera del directorio restringido para acceder a cualquier archivo del sistema.
+												</p>
+											</div>
+											<div class="col-6 col-12-medium">
+												<h4>Impacto (Triada CIA y OWASP)</h4>
+												<ul>
+													<li><strong>A01:2021 - Broken Access Control (OWASP Top 10):</strong> Control de acceso deficiente basado en validaciones superficiales de la estructura de la URL.</li>
+													<li><strong>Confidencialidad:</strong> Acceso no autorizado a archivos sensibles del servidor web (<code>/etc/passwd</code>) mediante la evasión del prefijo obligatorio.</li>
+													<li><strong>Principio de Defensa:</strong> No confiar en comprobaciones simples de inicio de cadena. Se debe resolver la ruta canónica absoluta mediante funciones del lenguaje y verificar que el directorio base resultante sea estrictamente el permitido.</li>
+												</ul>
+											</div>
+										</div>
+									</section>
+
+									<!-- 02. PROCEDIMIENTO TÉCNICO EN BURP SUITE -->
+									<section>
+										<h3 class="major">02. Procedimiento Técnico y Uso de Burp Suite</h3>
+										<p>
+											A continuación se detalla el procedimiento paso a paso para identificar y explotar el bypass de la validación del inicio de ruta:
+										</p>
+										<ol>
+											<li><strong>Intercepción de Petición:</strong> Se explora el sitio web e intercepta con <em>Burp Proxy</em> la solicitud GET utilizada para cargar la imagen de un producto.</li>
+											<li><strong>Transferencia a Repeater:</strong> Se reenvía la petición <code>GET /image?filename=/var/www/images/...</code> a <em>Burp Repeater</em> (<code>Ctrl + R</code>).</li>
+											<li><strong>Análisis de la Validación:</strong> Se observa que el parámetro <code>filename</code> incluye la ruta absoluta completa donde se alojan las imágenes (por ejemplo, <code>/var/www/images/50.jpg</code>). Si se intenta reemplazar toda la ruta por <code>../../../etc/passwd</code>, la aplicación devuelve un error al fallar la validación inicial.</li>
+											<li><strong>Inyección del Payload con Prefijo Válido:</strong> Se mantiene la ruta base requerida al inicio y se concatenan las secuencias de navegación hacia el directorio raíz:
+												<br /><code>/var/www/images/../../../etc/passwd</code>.
+											</li>
+											<li><strong>Confirmación de Explotación:</strong> La aplicación valida que la cadena comience por <code>/var/www/images/</code>, aprueba la solicitud y el sistema de archivos procesa las secuencias <code>../</code>, devolviendo el contenido del archivo <code>/etc/passwd</code> con un estado HTTP <code>200 OK</code>.</li>
+										</ol>
+									</section>
+
+									<hr />
+
+									<!-- 03. DOCUMENTACIÓN DEL LABORATORIO -->
+									<h2 class="major" style="margin-top: 2em;">03. Documentación Técnica del Laboratorio</h2>
+
+									<section class="box" style="background: rgba(255, 255, 255, 0.02); border-left: 4px solid #4caf50; margin-bottom: 3em;">
+										<h3 class="major">Lab: File path traversal, validation of start of path</h3>
+										<p>
+											<strong>URL del Laboratorio:</strong> <a href="https://portswigger.net/web-security/file-path-traversal/lab-validate-start-of-path" target="_blank">PortSwigger Web Security Academy - Validate Start of Path</a>
+										</p>
+
+										<h4>Alteración de la Petición HTTP:</h4>
+										<pre><code>-- Petición Original:
+GET /image?filename=/var/www/images/28.jpg HTTP/1.1
+Host: lab-id.web-security-academy.net
+
+-- Petición Alterada con Payload (Mantenimiento del Prefijo):
+GET /image?filename=/var/www/images/../../../etc/passwd HTTP/1.1
+Host: lab-id.web-security-academy.net</code></pre>
+
+										<h4>Explicación Técnica del Payload:</h4>
+										<blockquote style="border-left-color: #4caf50;">
+											<strong>Payload:</strong> <code>/var/www/images/../../../etc/passwd</code><br />
+											El filtro de validación revisa únicamente si el valor del parámetro comienza con el directorio esperado (<code>/var/www/images/</code>). Como la condición se cumple, la entrada se envía al sistema de archivos donde los tres niveles de <code>../</code> retroceden desde <code>/var/www/images/</code> hasta el directorio raíz (<code>/</code>), permitiendo la lectura directa de <code>/etc/passwd</code>.
+										</blockquote>
+
+										<h4>Evidencias y Capturas de Pantalla:</h4>
+										<div class="row gtr-uniform">
+											<!-- Captura Request / Payload -->
+											<div class="col-6 col-12-medium">
+												<span class="image fit">
+													<img src="images/path_traversal_start_path_request.png" alt="Captura Request Burp Suite Validate Start of Path" style="border: 1px solid rgba(255,255,255,0.2);" />
+												</span>
+												<p style="font-size: 0.85em; text-align: center; color: #aaa;">Fig 1.1: Interceptación e inyección conservando el prefijo <code>/var/www/images/</code> en Burp Repeater.</p>
+											</div>
+
+											<!-- Captura Response / Lab Solved -->
+											<div class="col-6 col-12-medium">
+												<span class="image fit">
+													<img src="images/path_traversal_start_path_solved.png" alt="Captura Respuesta y Lab Solved" style="border: 1px solid rgba(255,255,255,0.2);" />
+												</span>
+												<p style="font-size: 0.85em; text-align: center; color: #aaa;">Fig 1.2: Obtención del archivo <code>/etc/passwd</code> tras evadir la validación inicial y notificación "Lab Solved".</p>
+											</div>
+										</div>
+									</section>
+
+									<!-- 04. REPORTE TÉCNICO COMPLETO (PDF) -->
+									<section>
+										<h3 class="major">04. Documentación Adjunta (PDF)</h3>
+										<p>A continuación se habilita el visor y la descarga del reporte completo del laboratorio:</p>
+
+										<div class="box" style="border: 1px dashed rgba(255, 255, 255, 0.3); padding: 20px; text-align: center; background: rgba(255, 255, 255, 0.03);">
+											<div style="width: 100%; height: 500px; background: #1b1e2b; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+												<embed src="documentos/path_traversal_start_path_lab.pdf" type="application/pdf" width="100%" height="100%" />
+											</div>
+
+											<ul class="actions fit">
+												<li><a href="documentos/path_traversal_start_path_lab.pdf" download class="button primary icon solid fa-download">Descargar Reporte en PDF</a></li>
+											</ul>
+										</div>
+									</section>
+
+								</div>
+							</div>
+
+					</section>
+
+				<!-- Footer -->
+					<section id="footer">
+						<div class="inner">
+							<h2 class="major">Contacto / Información Académica</h2>
+							<p>Portafolio desarrollado para la materia CNO IV: Seguridad Informática | UPSLP.</p>
+							<ul class="contact">
+								<li class="icon solid fa-user">Lizeth Infante Martinez</li>
+								<li class="icon solid fa-university">Universidad Politécnica de San Luis Potosí</li>
+								<li class="icon solid fa-envelope"><a href="#">contacto@upslp.edu.mx</a></li>
+							</ul>
+							<ul class="copyright">
+								<li>&copy; Todos los derechos reservados.</li><li>Diseño: <a href="http://html5up.net">HTML5 UP</a></li>
+							</ul>
+						</div>
+					</section>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
