@@ -1,0 +1,193 @@
+<!DOCTYPE HTML>
+<!--
+	Solid State by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Lab: File Path Traversal (Null Byte Bypass) - PortSwigger</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Page Wrapper -->
+			<div id="page-wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<h1><a href="index.html">UPSLP</a></h1>
+						<nav>
+							<a href="#menu">Menú</a>
+						</nav>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<div class="inner">
+							<h2>Menú</h2>
+							<ul class="links">
+								<li><a href="index.html">Inicio</a></li>
+								<li><a href="proyecto1.html">Práctica / Laboratorio 1</a></li>
+								<li><a href="index.html#road-to-hall-of-fame">Road to Hall of Fame</a></li>
+							</ul>
+							<a href="#" class="close">Cerrar</a>
+						</div>
+					</nav>
+
+				<!-- Wrapper -->
+					<section id="wrapper">
+						<header>
+							<div class="inner">
+								<h2>File Path Traversal - Validation of File Extension with Null Byte Bypass</h2>
+								<p>Laboratorio Práctico de PortSwigger Web Security Academy</p>
+							</div>
+						</header>
+
+						<!-- Content -->
+							<div class="wrapper">
+								<div class="inner">
+
+									<!-- 01. MARCO TEÓRICO Y FUNDAMENTACIÓN TÉCNICA -->
+									<section>
+										<h3 class="major">01. Marco Teórico y Fundamentación Técnica</h3>
+										<p>
+											<strong>File Path Traversal con Inyección de Null Byte (<code>%00</code>)</strong> es una técnica de evasión empleada en aplicaciones donde el servidor valida que el nombre del archivo termine con una extensión permitida (por ejemplo, <code>.png</code> o <code>.jpg</code>) antes de cargarlo.
+										</p>
+										
+										<div class="row">
+											<div class="col-6 col-12-medium">
+												<h4>Mecanismo de la Vulnerabilidad</h4>
+												<p>
+													En lenguajes de programación basados en C/C++ (o envoltorios del sistema de archivos de bajo nivel), el carácter byte nulo (<code>0x00</code> o <code>%00</code> en formato URL) se utiliza como un delimitador de fin de cadena (<em>null terminator</em>).
+												</p>
+												<p>
+													Cuando la aplicación web procesa la entrada, la validación de alto nivel comprueba la cadena completa y confirma que finaliza en <code>.jpg</code>. Sin embargo, al pasar la cadena a las funciones de lectura de archivos del sistema operativo, el proceso se interrumpe inmediatamente al llegar al <code>%00</code>, ignorando la extensión posterior y leyendo la ruta inyectada.
+												</p>
+											</div>
+											<div class="col-6 col-12-medium">
+												<h4>Impacto (Triada CIA y OWASP)</h4>
+												<ul>
+													<li><strong>A01:2021 - Broken Access Control (OWASP Top 10):</strong> Evasión de la validación de extensiones permitidas mediante discrepancias en la interpretación del fin de cadena.</li>
+													<li><strong>Confidencialidad:</strong> Extracción de archivos sensibles como <code>/etc/passwd</code> anulando la comprobación obligatoria de formato de imagen.</li>
+													<li><strong>Principio de Defensa:</strong> Utilizar APIs modernas de gestión de archivos que no dependan del carácter nulo como terminador y validar el tipo MIME real mediante inspección de contenido (magia de bytes) en lugar de la extensión solicitada.</li>
+												</ul>
+											</div>
+										</div>
+									</section>
+
+									<!-- 02. PROCEDIMIENTO TÉCNICO EN BURP SUITE -->
+									<section>
+										<h3 class="major">02. Procedimiento Técnico y Uso de Burp Suite</h3>
+										<p>
+											A continuación se detalla el procedimiento paso a paso para identificar y explotar el bypass por Null Byte:
+										</p>
+										<ol>
+											<li><strong>Intercepción de Petición:</strong> Se navega en el sitio e intercepta con <em>Burp Proxy</em> la solicitud GET que carga las imágenes de los productos.</li>
+											<li><strong>Transferencia a Repeater:</strong> Se reenvía la petición <code>GET /image?filename=...</code> a <em>Burp Repeater</em> (<code>Ctrl + R</code>).</li>
+											<li><strong>Análisis del Control de Extensión:</strong> Al intentar inyectar <code>../../../etc/passwd</code>, la aplicación rechaza la solicitud indicando que el archivo debe terminar en una extensión válida de imagen (ej. <code>.png</code> o <code>.jpg</code>).</li>
+											<li><strong>Inyección del Payload con Null Byte:</strong> Se construye el payload agregando el carácter nulo codificado en URL antes de la extensión requerida:
+												<br /><code>../../../etc/passwd%00.jpg</code>.
+											</li>
+											<li><strong>Confirmación de Explotación:</strong> La aplicación aprueba la solicitud porque termina en <code>.jpg</code>, pero la llamada al sistema de archivos se trunca en <code>/etc/passwd</code>, devolviendo el contenido del archivo con código de respuesta <code>200 OK</code>.</li>
+										</ol>
+									</section>
+
+									<hr />
+
+									<!-- 03. DOCUMENTACIÓN DEL LABORATORIO -->
+									<h2 class="major" style="margin-top: 2em;">03. Documentación Técnica del Laboratorio</h2>
+
+									<section class="box" style="background: rgba(255, 255, 255, 0.02); border-left: 4px solid #4caf50; margin-bottom: 3em;">
+										<h3 class="major">Lab: File path traversal, validation of file extension with null byte bypass</h3>
+										<p>
+											<strong>URL del Laboratorio:</strong> <a href="https://portswigger.net/web-security/file-path-traversal/lab-validate-file-extension-null-byte-bypass" target="_blank">PortSwigger Web Security Academy - Null Byte Bypass</a>
+										</p>
+
+										<h4>Alteración de la Petición HTTP:</h4>
+										<pre><code>-- Petición Original:
+GET /image?filename=34.jpg HTTP/1.1
+Host: lab-id.web-security-academy.net
+
+-- Petición Alterada con Payload (Null Byte Injection):
+GET /image?filename=../../../etc/passwd%00.jpg HTTP/1.1
+Host: lab-id.web-security-academy.net</code></pre>
+
+										<h4>Explicación Técnica del Payload:</h4>
+										<blockquote style="border-left-color: #4caf50;">
+											<strong>Payload:</strong> <code>../../../etc/passwd%00.jpg</code><br />
+											La validación de la aplicación revisa que la cadena termine con la extensión esperada (<code>.jpg</code>). Como esta regla se satisface, la petición es aprobada. Sin embargo, al enviarse al sistema de archivos del servidor, la secuencia de bytes se trunca en el Byte Nulo (<code>%00</code>), provocando que la operación abra y lea únicamente el archivo <code>/etc/passwd</code>.
+										</blockquote>
+
+										<h4>Evidencias y Capturas de Pantalla:</h4>
+										<div class="row gtr-uniform">
+											<!-- Captura Request / Payload -->
+											<div class="col-6 col-12-medium">
+												<span class="image fit">
+													<img src="images/path_traversal_nullbyte_request.png" alt="Captura Request Burp Suite Null Byte Bypass" style="border: 1px solid rgba(255,255,255,0.2);" />
+												</span>
+												<p style="font-size: 0.85em; text-align: center; color: #aaa;">Fig 1.1: Inyección del payload con terminador nulo <code>%00.jpg</code> en Burp Repeater.</p>
+											</div>
+
+											<!-- Captura Response / Lab Solved -->
+											<div class="col-6 col-12-medium">
+												<span class="image fit">
+													<img src="images/path_traversal_nullbyte_solved.png" alt="Captura Respuesta y Lab Solved" style="border: 1px solid rgba(255,255,255,0.2);" />
+												</span>
+												<p style="font-size: 0.85em; text-align: center; color: #aaa;">Fig 1.2: Lectura del archivo <code>/etc/passwd</code> tras la truncación por byte nulo y confirmación "Lab Solved".</p>
+											</div>
+										</div>
+									</section>
+
+									<!-- 04. REPORTE TÉCNICO COMPLETO (PDF) -->
+									<section>
+										<h3 class="major">04. Documentación Adjunta (PDF)</h3>
+										<p>A continuación se habilita el visor y la descarga del reporte completo del laboratorio:</p>
+
+										<div class="box" style="border: 1px dashed rgba(255, 255, 255, 0.3); padding: 20px; text-align: center; background: rgba(255, 255, 255, 0.03);">
+											<div style="width: 100%; height: 500px; background: #1b1e2b; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+												<embed src="documentos/path_traversal_nullbyte_lab.pdf" type="application/pdf" width="100%" height="100%" />
+											</div>
+
+											<ul class="actions fit">
+												<li><a href="documentos/path_traversal_nullbyte_lab.pdf" download class="button primary icon solid fa-download">Descargar Reporte en PDF</a></li>
+											</ul>
+										</div>
+									</section>
+
+								</div>
+							</div>
+
+					</section>
+
+				<!-- Footer -->
+					<section id="footer">
+						<div class="inner">
+							<h2 class="major">Contacto / Información Académica</h2>
+							<p>Portafolio desarrollado para la materia CNO IV: Seguridad Informática | UPSLP.</p>
+							<ul class="contact">
+								<li class="icon solid fa-user">Lizeth Infante Martinez</li>
+								<li class="icon solid fa-university">Universidad Politécnica de San Luis Potosí</li>
+								<li class="icon solid fa-envelope"><a href="#">contacto@upslp.edu.mx</a></li>
+							</ul>
+							<ul class="copyright">
+								<li>&copy; Todos los derechos reservados.</li><li>Diseño: <a href="http://html5up.net">HTML5 UP</a></li>
+							</ul>
+						</div>
+					</section>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
