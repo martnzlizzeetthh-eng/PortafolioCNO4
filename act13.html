@@ -1,0 +1,217 @@
+<!DOCTYPE HTML>
+<!--
+	Solid State by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Actividad 13: Red Team Report - My File Server 1</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Page Wrapper -->
+			<div id="page-wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<h1><a href="index.html">UPSLP</a></h1>
+						<nav>
+							<a href="#menu">Menú</a>
+						</nav>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<div class="inner">
+							<h2>Menú</h2>
+							<ul class="links">
+								<li><a href="index.html">Inicio</a></li>
+								<li><a href="proyecto1.html">Práctica / Laboratorio 1</a></li>
+								<li><a href="index.html#road-to-hall-of-fame">Road to Hall of Fame</a></li>
+							</ul>
+							<a href="#" class="close">Cerrar</a>
+						</div>
+					</nav>
+
+				<!-- Wrapper -->
+					<section id="wrapper">
+						<header>
+							<div class="inner">
+								<h2>ACTIVIDAD 13 - Red Team Report: Pentesting de My File Server 1</h2>
+								<p>Evaluación de Seguridad Ofensiva en Entorno Corporativo Vulnerable</p>
+							</div>
+						</header>
+
+						<!-- Content -->
+							<div class="wrapper">
+								<div class="inner">
+
+									<!-- 01. MARCO TEÓRICO Y OBJETIVOS DE LA PRÁCTICA -->
+									<section>
+										<h3 class="major">01. Contexto y Objetivos del Pentesting</h3>
+										<p>
+											La máquina <strong>My File Server: 1</strong> simula un entorno corporativo enfocado en servicios de almacenamiento y servidor de archivos. En este ejercicio se asume el rol de <strong>Analista Red Team</strong> contratado por la organización para evaluar el nivel de exposición del sistema mediante una metodología estructurada de pruebas de penetración.
+										</p>
+										
+										<div class="row">
+											<div class="col-6 col-12-medium">
+												<h4>Objetivo General</h4>
+												<p>
+													Desarrollar un informe técnico profesional de pruebas de penetración (Pentesting Report) sobre la máquina vulnerable My File Server: 1, aplicando una metodología estructurada de evaluación de seguridad, documentando hallazgos, evidencias técnicas, análisis de riesgo y propuestas de mitigación.
+												</p>
+											</div>
+											<div class="col-6 col-12-medium">
+												<h4>Objetivos Específicos</h4>
+												<ul>
+													<li>Aplicar una metodología formal de pentesting (reconocimiento, enumeración, explotación y post-explotación).</li>
+													<li>Identificar, explotar y documentar vulnerabilidades en la máquina objetivo[cite: 10].</li>
+													<li>Elaborar un informe técnico con estructura ejecutiva y técnica, incluyendo evaluación de impacto y recomendaciones de remediación[cite: 10].</li>
+												</ul>
+											</div>
+										</div>
+									</section>
+
+									<!-- 02. METODOLOGÍA Y FASES DEL ATAQUE -->
+									<section>
+										<h3 class="major">02. Metodología y Fases de Evaluación</h3>
+										<p>
+											El proceso de auditoría ofensiva se desarrolló abarcando las siguientes etapas principales del ciclo de pentesting:
+										</p>
+										<div class="table-wrapper">
+											<table>
+												<thead>
+													<tr>
+														<th>Fase</th>
+														<th>Descripción Técnica</th>
+													</tr>
+												</thead>
+												<tbody>
+													<tr>
+														<td><strong>1. Reconocimiento y Enumeración</strong></td>
+														<td>Identificación de puertos abiertos, detección de servicios activos y enumeración de vectores expuestos en el servidor de archivos.</td>
+													</tr>
+													<tr>
+														<td><strong>2. Explotación</strong></td>
+														<td>Aprovechamiento de vulnerabilidades identificadas para obtener acceso inicial al sistema objetivo.</td>
+													</tr>
+													<tr>
+														<td><strong>3. Escalada de Privilegios</strong></td>
+														<td>Análisis de configuraciones defectuosas, permisos del sistema o binaries vulnerables para elevar privilegios hasta la cuenta de superusuario (root).</td>
+													</tr>
+													<tr>
+														<td><strong>4. Análisis de Impacto (CIA)</strong></td>
+														<td>Evaluación de los riesgos potenciales sobre la Confidencialidad, Integridad y Disponibilidad de la información corporativa.</td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+									</section>
+
+									<hr />
+
+									<!-- 03. TABLA RESUMEN DE HALLAZGOS -->
+									<h2 class="major" style="margin-top: 2em;">03. Resumen Ejecutivo de Hallazgos</h2>
+									<p>A continuación se sintetiza la matriz de hallazgos identificados durante la auditoría Red Team[cite: 10]:</p>
+
+									<div class="table-wrapper">
+										<table>
+											<thead>
+												<tr>
+													<th>ID</th>
+													<th>Vulnerabilidad</th>
+													<th>Severidad</th>
+													<th>Evidencia</th>
+													<th>Impacto</th>
+													<th>Recomendación</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td><strong>VULN-01</strong></td>
+													<td>Enumeración de Servicios Expuestos / Configuración Defectuosa</td>
+													<td><span style="color: #ffaa00; font-weight: bold;">Media</span></td>
+													<td>Escaneo Nmap / Banner Grabbing</td>
+													<td>Exposición de servicios críticos y versiones de software.</td>
+													<td>Restringir acceso por firewall y actualizar servicios.</td>
+												</tr>
+												<tr>
+													<td><strong>VULN-02</strong></td>
+													<td>Ejecución Remota de Código / Acceso Inicial</td>
+													<td><span style="color: #ff4444; font-weight: bold;">Alta</span></td>
+													<td>Exploit / Shell Reversa exitosa</td>
+													<td>Compromiso total del acceso de usuario en el servidor.</td>
+													<td>Aplicar parches de seguridad y validar entradas en el servicio.</td>
+												</tr>
+												<tr>
+													<td><strong>VULN-03</strong></td>
+													<td>Escalada de Privilegios Local a Root</td>
+													<td><span style="color: #ff0055; font-weight: bold;">Crítica</span></td>
+													<td>Acceso Root / Lectura de Flag Final</td>
+													<td>Control total de la máquina objetivo y sus archivos de almacenamiento.</td>
+													<td>Ajustar permisos SUID/Sudoers y principio de mínimo privilegio.</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+
+									<hr />
+
+									<!-- 04. DOCUMENTACIÓN ADJUNTA (DOCUMENTOS Y REPORTES EN PDF) -->
+									<section>
+										<h3 class="major">04. Informe Técnico Completo (PDF Adjunto)</h3>
+										<p>
+											En los siguientes apartados se adjunta la documentación técnica formal en PDF con el desglose del informe que incluye portada, resumen ejecutivo, alcance, procedimiento paso a paso, capturas de evidencia y recomendaciones[cite: 10]:
+										</p>
+
+										<!-- ESPACIO PARA ADJUNTAR EL REPORTE COMPLETO EN PDF -->
+										<div class="box" style="border: 1px dashed rgba(255, 255, 255, 0.3); padding: 20px; text-align: center; background: rgba(255, 255, 255, 0.03); margin-bottom: 2em;">
+											<h4 style="margin-bottom: 15px;">Reporte Técnico Red Team - My File Server 1</h4>
+											<div style="width: 100%; height: 600px; background: #1b1e2b; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+												<embed src="documentos/Red_Team_Report_My_File_Server_1.pdf" type="application/pdf" width="100%" height="100%" />
+											</div>
+
+											<ul class="actions fit">
+												<li><a href="documentos/Red_Team_Report_My_File_Server_1.pdf" download class="button primary icon solid fa-download">Descargar Informe Completo en PDF</a></li>
+											</ul>
+										</div>
+
+									</section>
+
+								</div>
+							</div>
+
+					</section>
+
+				<!-- Footer -->
+					<section id="footer">
+						<div class="inner">
+							<h2 class="major">Contacto / Información Académica</h2>
+							<p>Portafolio desarrollado para la materia CNO IV: Seguridad Informática | UPSLP.</p>
+							<ul class="contact">
+								<li class="icon solid fa-user">Lizeth Infante Martinez</li>
+								<li class="icon solid fa-university">Universidad Politécnica de San Luis Potosí</li>
+								<li class="icon solid fa-envelope"><a href="#">contacto@upslp.edu.mx</a></li>
+							</ul>
+							<ul class="copyright">
+								<li>&copy; Todos los derechos reservados.</li><li>Diseño: <a href="http://html5up.net">HTML5 UP</a></li>
+							</ul>
+						</div>
+					</section>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
