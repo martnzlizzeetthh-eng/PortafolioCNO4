@@ -1,0 +1,262 @@
+<!DOCTYPE HTML>
+<!--
+	Solid State by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Actividad 11 - Análisis Forense de Metadatos y Geolocalización</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Page Wrapper -->
+			<div id="page-wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<h1><a href="index.html">Portafolio</a></h1>
+						<nav>
+							<a href="#menu">Menú</a>
+						</nav>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<div class="inner">
+							<h2>Menú</h2>
+							<ul class="links">
+								<li><a href="index.html">Inicio</a></li>
+								<li><a href="actividad11_metadatos.html">Actividad 11: Metadatos y Geolocalización</a></li>
+							</ul>
+							<a href="#" class="close">Cerrar</a>
+						</div>
+					</nav>
+
+				<!-- Wrapper -->
+					<section id="wrapper">
+						<header>
+							<div class="inner">
+								<h2>Actividad 11. La fotografía como testigo</h2>
+								<p>Extracción de metadatos GPS, análisis forense de archivos y geolocalización mediante ExifTool.</p>
+							</div>
+						</header>
+
+						<!-- Content -->
+							<div class="wrapper">
+								<div class="inner">
+
+									<!-- 1. INTRODUCCIÓN Y CONTEXTO -->
+									<section>
+										<h3 class="major">1. Introducción y Objetivos de la Práctica</h3>
+										<p>
+											El presente reporte documenta la ejecución de un análisis forense digital enfocado en el procesamiento y extracción de metadatos en fuentes de información heterogéneas (documentos de texto y archivos de imagen) mediante el uso de la herramienta de línea de comandos <strong>ExifTool</strong>.
+										</p>
+										<p>
+											El objetivo primordial es reconstruir el origen, autoría, marcas temporales y geolocalización exacta asociada a las evidencias recolectadas, así como aplicar técnicas de sanitización y borrado de metadatos para la protección de la privacidad.
+										</p>
+										<h4>Detalles de la Práctica:</h4>
+										<ul>
+											<li><strong>Institución:</strong> Universidad Politécnica de San Luis Potosí (UPSLP)</li>
+											<li><strong>Materia / Módulo:</strong> Informática Criminal / Ciberseguridad</li>
+											<li><strong>Estudiante:</strong> Lizeth Infante Martinez</li>
+											<li><strong>Herramienta Principal:</strong> ExifTool CLI / GPS Map Viewer</li>
+										</ul>
+									</section>
+
+									<!-- 2. PARTE I: ANÁLISIS DEL DOCUMENTO INTERPOL -->
+									<section>
+										<h3 class="major">2. Parte I. Análisis de Metadatos (Documento INTERPOL)</h3>
+										<p>
+											Se procedió a examinar la estructura de metadatos del fichero <code>WOA database application form.docx</code> perteneciente a la organización INTERPOL:
+										</p>
+										<pre><code># Comando ejecutado para extracción de metadatos completos
+exiftool "WOA database application form.docx"</code></pre>
+
+										<h4>Resultados del Análisis Forense:</h4>
+										<div class="table-wrapper">
+											<table>
+												<thead>
+													<tr>
+														<th>Criterio / Campo Analizado</th>
+														<th>Metadato Identificado</th>
+														<th>Observación / Detalle</th>
+													</tr>
+												</thead>
+												<tbody>
+													<tr>
+														<td><strong>Categorización del archivo:</strong></td>
+														<td>[Insertar Categoría, ej. RESTRICTED / UNCLASSIFIED]</td>
+														<td>Categoría asignada dentro del sistema de INTERPOL.</td>
+													</tr>
+													<tr>
+														<td><strong>Plantilla (Template) utilizada:</strong></td>
+														<td>[Insertar nombre de la plantilla, ej. Normal.dotm]</td>
+														<td>Template base empleado para la estructuración.</td>
+													</tr>
+													<tr>
+														<td><strong>Tiempo total de edición:</strong></td>
+														<td>[Insertar minutos/horas]</td>
+														<td>Total Edit Time registrado por el procesador.</td>
+													</tr>
+													<tr>
+														<td><strong>Compañía propietaria:</strong></td>
+														<td>[Insertar Nombre de la Compañía / Organización]</td>
+														<td>Organización/Empresa registrada en la licencia.</td>
+													</tr>
+													<tr>
+														<td><strong>Última modificación realizada por:</strong></td>
+														<td>[Insertar Usuario]</td>
+														<td>Último editor que modificó y guardó el fichero.</td>
+													</tr>
+													<tr>
+														<td><strong>Fecha de creación:</strong></td>
+														<td>[YYYY:MM:DD HH:MM:SS]</td>
+														<td>Marca temporal (Timestamp) de creación original.</td>
+													</tr>
+													<tr>
+														<td><strong>Creador / Autor original:</strong></td>
+														<td>[Insertar Creador]</td>
+														<td>Usuario que generó el documento fuente.</td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+									</section>
+
+									<!-- 3. PARTE II: ANÁLISIS EXIF Y GEOLOCALIZACIÓN GPS -->
+									<section>
+										<h3 class="major">3. Parte II. Análisis EXIF de Imagen y Geolocalización GPS</h3>
+										<p>
+											Se realizó la inspección de los campos EXIF contenidos en la fotografía <code>XiaomiMiA2Lite.jpg</code> para determinar los parámetros fotográficos y las coordenadas de geolocalización en las que fue capturada:
+										</p>
+										<pre><code># Inspección de datos EXIF y coordenadas GPS
+exiftool XiaomiMiA2Lite.jpg
+
+# Extracción específica de coordenadas en formato decimal
+exiftool -c "%.6f" -gpslatitude -gpslongitude XiaomiMiA2Lite.jpg</code></pre>
+
+										<h4>Parámetros Técnicos y Datos Fotográficos:</h4>
+										<div class="table-wrapper">
+											<table>
+												<thead>
+													<tr>
+														<th>Parámetro EXIF</th>
+														<th>Valor / Resultado</th>
+													</tr>
+												</thead>
+												<tbody>
+													<tr>
+														<td><strong>Sensibilidad / Apertura ISO:</strong></td>
+														<td>[Ej. ISO 100 / ISO 200]</td>
+													</tr>
+													<tr>
+														<td><strong>Longitud Focal:</strong></td>
+														<td>[Ej. 3.82 mm]</td>
+													</tr>
+													<tr>
+														<td><strong>Uso de Flash:</strong></td>
+														<td>[No Flash / Flash fired]</td>
+													</tr>
+													<tr>
+														<td><strong>Fecha de Creación de la Imagen:</strong></td>
+														<td>[YYYY:MM:DD HH:MM:SS]</td>
+													</tr>
+													<tr>
+														<td><strong>Coordenadas GPS (Latitud / Longitud):</strong></td>
+														<td>[Ej. 22.1485° N, 100.9852° W]</td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+
+										<blockquote>
+											<strong>Ubicación Exacta identificada:</strong> [Escribir aquí la dirección/referencia exacta del lugar tras ingresar las coordenadas en Google Maps / OpenStreetMap, ej.: Campus UPSLP, San Luis Potosí, México].
+										</blockquote>
+
+										<h4>Sanitización y Eliminación de Metadatos:</h4>
+										<p>
+											Para dar cumplimiento a la solicitud de borrado y protección de datos, se aplicó la instrucción de eliminación completa de cabeceras EXIF en la muestra de prueba:
+										</p>
+										<pre><code># Borrado completo de todos los metadatos de la imagen
+exiftool -all= XiaomiMiA2Lite.jpg
+
+# Verificación de sanitización
+exiftool XiaomiMiA2Lite.jpg</code></pre>
+									</section>
+
+									<!-- ======================================================= -->
+									<!-- ESPACIO RESERVADO PARA DESCARGA DE RECURSOS / EVIDENCIAS -->
+									<!-- ======================================================= -->
+									<section>
+										<h3 class="major">4. Archivos de Evidencia y Muestras (ZIP)</h3>
+										<p>Puedes descargar el paquete comprimido que contiene las imágenes originales, las versiones sanitizadas y las capturas de pantalla del proceso de extracción:</p>
+
+										<div class="box" style="border: 1px dashed #ffffff55; padding: 20px; text-align: center; background: rgba(255, 255, 255, 0.03);">
+											<h4>Paquete de Evidencias de la Práctica</h4>
+											<p style="margin-bottom: 15px;"><code>Actividad11_Evidencias_Metadatos.zip</code> (Imágenes, logs de ExifTool y capturas GPS)</p>
+
+											<ul class="actions fit">
+												<li><a href="Actividad11_Evidencias_Metadatos.zip" download class="button primary icon solid fa-download">Descargar Evidencias (.zip)</a></li>
+											</ul>
+										</div>
+									</section>
+
+									<!-- ======================================================= -->
+									<!-- ESPACIO RESERVADO PARA EL DOCUMENTO PDF -->
+									<!-- ======================================================= -->
+									<section>
+										<h3 class="major">5. Reporte Técnico Completo (PDF)</h3>
+										<p>A continuación puedes visualizar o descargar el reporte escrito completo con los hallazgos detallados de la actividad:</p>
+
+										<div class="box" style="border: 1px dashed #ffffff55; padding: 20px; text-align: center; background: rgba(255, 255, 255, 0.03);">
+											<h4>Visualizador del Reporte de Práctica (PDF)</h4>
+											
+											<!-- Embed / Viewer para el PDF -->
+											<div style="width: 100%; height: 500px; background: #222; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+												<embed src="Actividad11_Metadatos_Geolocalizacion.pdf" type="application/pdf" width="100%" height="100%" />
+											</div>
+
+											<ul class="actions fit">
+												<li><a href="Actividad11_Metadatos_Geolocalizacion.pdf" download class="button primary icon solid fa-download">Descargar Reporte en PDF</a></li>
+											</ul>
+										</div>
+									</section>
+
+								</div>
+							</div>
+
+					</section>
+
+				<!-- Footer -->
+					<section id="footer">
+						<div class="inner">
+							<h2 class="major">Contacto / Información Académica</h2>
+							<p>Portafolio profesional desarrollado para la presentación de prácticas de laboratorio y proyectos de informática criminal y ciberseguridad.</p>
+							<ul class="contact">
+								<li class="icon solid fa-envelope"><a href="#">contacto@correo.com</a></li>
+								<li class="icon brands fa-github"><a href="#">github.com/usuario</a></li>
+								<li class="icon brands fa-linkedin"><a href="#">linkedin.com/in/usuario</a></li>
+							</ul>
+							<ul class="copyright">
+								<li>&copy; Todos los derechos reservados. UPSLP.</li><li>Diseño: <a href="http://html5up.net">HTML5 UP</a></li>
+							</ul>
+						</div>
+					</section>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
