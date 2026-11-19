@@ -1,0 +1,228 @@
+<!DOCTYPE HTML>
+<!--
+	Solid State by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>PR03: Operación Narcos - Lizeth Infante Martinez</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Page Wrapper -->
+			<div id="page-wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<h1><a href="index.html">UPSLP</a></h1>
+						<nav>
+							<a href="#menu">Menú</a>
+						</nav>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<div class="inner">
+							<h2>Menú</h2>
+							<ul class="links">
+								<li><a href="index.html">Inicio</a></li>
+								<li><a href="elements.html">Walkthrough (PR)</a></li>
+								<li><a href="pr03.html">PR03: Operación Narcos</a></li>
+							</ul>
+							<a href="#" class="close">Cerrar</a>
+						</div>
+					</nav>
+
+				<!-- Wrapper -->
+					<section id="wrapper">
+						<header>
+							<div class="inner">
+								<h2>PR03. Operación Narcos: Expediente Kowhai</h2>
+								<p>Lizeth Infante Martinez | CNO-VI SEGURIDAD INFORMATICA | UPSLP - 7mo semestre</p>
+							</div>
+						</header>
+
+						<!-- Content -->
+							<div class="wrapper">
+								<div class="inner">
+
+									<!-- 1. INTRODUCCIÓN Y CONTEXTO DEL CASO -->
+									<section>
+										<h3 class="major">1. Contexto del Caso y Objetivos de la Investigación</h3>
+										<p>
+											Tras una alerta internacional de inteligencia sobre el tráfico de sustancias ilícitas hacia Nueva Zelanda, dos pasajeros procedentes de Australia (John Fredricksen y Jane Esteban) fueron interceptados en el aeropuerto de Wellington con un kilogramo de metanfetamina. Las investigaciones señalaron dos puntos de entrega: la biblioteca de Eastbourne y un inmueble en Petone vinculado a <strong>Steve Kowhai</strong>.
+										</p>
+										<p>
+											En el allanamiento al domicilio de Petone se incautó una computadora de escritorio cuya imagen forense, identificada como <code>Narcos-1</code>, constituye el objeto de este análisis. El propósito central de esta investigación forense digital es preservar la integridad de la evidencia, extraer artefactos relevantes del sistema y reconstruir de manera fundamentada las actividades que permitan establecer o descartar vínculos con los hechos investigados.
+										</p>
+										<h4>Metodología Aplicada:</h4>
+										<ul>
+											<li><strong>Adquisición y Verificación de Integridad:</strong> Preservación de la imagen original <code>Narcos-1.zip</code> mediante cálculo y validación de sumas de verificación criptográficas (MD5/SHA-256) antes de su montaje en herramientas forenses (FTK Imager y Autopsy)[cite: 3].</li>
+											<li><strong>Análisis de Artefactos del Sistema:</strong> Inspección del registro de Windows, perfiles de usuario, historial de navegación y líneas de tiempo de actividad[cite: 3].</li>
+											<li><strong>Análisis de Archivos, Metadatos y Herramientas:</strong> Revisión de documentos, imágenes sospechosas, metadatos EXIF/MACB y rastros de software de ocultamiento o cifrado de información[cite: 3].</li>
+										</ul>
+									</section>
+
+									<!-- 2. PARTE I: EXTRACCIÓN E IDENTIFICACIÓN DE EVIDENCIA DIGITAL -->
+									<section>
+										<h3 class="major">2. Parte I: Extracción e Identificación de Evidencia Digital</h3>
+										<p>
+											A continuación se resumen los ejes técnicos examinados dentro de la imagen forense <code>Narcos-1</code>, documentando rutas absolutas, hashes MD5 y artefactos comprobables[cite: 3]:
+										</p>
+
+										<div class="row">
+											<div class="col-6 col-12-medium">
+												<h4>Sistema Operativo y Navegación[cite: 3]</h4>
+												<ul>
+													<li><strong>Edición y versión de Windows:</strong> Extracción mediante el subárbol del registro <code>SOFTWARE\Microsoft\Windows NT\CurrentVersion</code>[cite: 3].</li>
+													<li><strong>Perfil Principal:</strong> Identificación de la carpeta de usuario en <code>C:\Users\&lt;Usuario&gt;</code> y análisis de actividad de ejecución mediante la clave <code>UserAssist</code> en el archivo <code>NTUSER.DAT</code>[cite: 3].</li>
+													<li><strong>Artefactos de Navegación:</strong> Identificación de los dos navegadores con historial activo, localización de sus bases de datos SQLite (<code>History</code>) y verificación del hash MD5 del perfil predeterminado de Google Chrome[cite: 3].</li>
+												</ul>
+											</div>
+											<div class="col-6 col-12-medium">
+												<h4>Documentos, Metadatos y Programas[cite: 3]</h4>
+												<ul>
+													<li><strong>Evidencia Gráfica y Temporalidad:</strong> Análisis de rutas, hashes MD5 y marcas de tiempo (creación y última modificación en zona horaria <strong>NZDT</strong>) de los archivos <code>airport crystals.jpg</code>, <code>dropoff.jpg</code> y <code>Method run.jpg</code>[cite: 3].</li>
+													<li><strong>Logística de Vuelos:</strong> Localización de <code>BNE.png</code> y el archivo de imagen de reservaciones dentro del directorio <code>Documents\Misc</code>[cite: 3].</li>
+													<li><strong>Ocultamiento y Comunicaciones:</strong> Identificación de instaladores de herramientas de esteganografía y cifrado en <code>Downloads</code>, además de las rutas de caché de <strong>Discord</strong> y la base de datos <code>ActivitiesCache.db</code> (Windows Timeline)[cite: 3].</li>
+												</ul>
+											</div>
+										</div>
+									</section>
+
+									<!-- 3. PARTE II: INVESTIGACIÓN, INTERPRETACIÓN Y ANÁLISIS DEL CASO -->
+									<section>
+										<h3 class="major">3. Parte II: Interpretación Forense y Análisis del Caso</h3>
+										<p>
+											El análisis interpretativo diferencia estrictamente entre los hechos observables en el disco, las inferencias técnicas sustentadas y aquello que no puede afirmarse sin evidencia adicional[cite: 3]:
+										</p>
+										
+										<blockquote>
+											<strong>Rigor Pericial:</strong> La presencia de un archivo o instalador descargado en el sistema demuestra almacenamiento o descarga, pero no equivale por sí misma a su ejecución ni confirma autoría humana directa sin el respaldo de artefactos de ejecución (Prefetch, UserAssist, Amcache o Timeline)[cite: 3].
+										</blockquote>
+
+										<div class="table-wrapper">
+											<table>
+												<thead>
+													<tr>
+														<th>Línea de Investigación[cite: 3]</th>
+														<th>Hallazgos e Interpretación Técnica[cite: 3]</th>
+													</tr>
+												</thead>
+												<tbody>
+													<tr>
+														<td><strong>Logística y Desplazamientos</strong>[cite: 3]</td>
+														<td>Correlación de coincidencias geográficas, fechas y puntos de entrega entre <code>flightbookings</code>, <code>BNE.png</code> y <code>dropoff.jpg</code>[cite: 3].</td>
+													</tr>
+													<tr>
+														<td><strong>Correlación de Actividad</strong>[cite: 3]</td>
+														<td>Contraste de las marcas de tiempo de <code>airport crystals.jpg</code> y <code>Method run.jpg</code> frente a los registros de actividad del equipo (<code>ActivitiesCache.db</code> / historial) para determinar su finalidad[cite: 3].</td>
+													</tr>
+													<tr>
+														<td><strong>Uso de Discord</strong>[cite: 3]</td>
+														<td>Validación de presencia y uso mediante caché local, delimitando qué no puede concluirse sobre contenido de mensajes, interlocutores o autoría sin registros verificables[cite: 3].</td>
+													</tr>
+													<tr>
+														<td><strong>Esteganografía y Cifrado</strong>[cite: 3]</td>
+														<td>Separación forense por niveles (descarga, instalación, ejecución y uso efectivo) respaldada por artefactos específicos del sistema[cite: 3].</td>
+													</tr>
+													<tr>
+														<td><strong>Hipótesis del Caso</strong>[cite: 3]</td>
+														<td>Formulación de hipótesis principal y explicación alternativa sustentadas en cuatro hallazgos clave, especificando dos evidencias adicionales requeridas[cite: 3].</td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+									</section>
+
+									<!-- ======================================================= -->
+									<!-- ESPACIO RESERVADO PARA EL VIDEO EXPLICATIVO -->
+									<!-- ======================================================= -->
+									<section>
+										<h3 class="major">4. Video Explicativo de la Investigación Forense</h3>
+										<p>En el siguiente espacio se presentará el recorrido técnico en video sobre el análisis de la imagen <code>Narcos-1</code>:</p>
+
+										<!-- [INICIO ESPACIO VIDEO] -->
+										<div class="box alt">
+											<div class="video-container" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; display: flex; align-items: center; justify-content: center; border: 1px dashed #ffffff55; border-radius: 6px;">
+												<!-- REEMPLAZAR ESTE TEXTO POR TU ETIQUETA <video> O <iframe src="URL_VIDEO"></iframe> -->
+												<p style="position: absolute; top: 45%; width: 100%; text-align: center; color: #888;">
+													<strong>[ESPACIO LIBRE RESERVADO PARA EL VIDEO DEL PROYECTO 03]</strong><br />
+													<em>Inserta aquí tu etiqueta &lt;iframe&gt; o &lt;video src="..."&gt;&lt;/video&gt;</em>
+												</p>
+											</div>
+										</div>
+										<!-- [FIN ESPACIO VIDEO] -->
+									</section>
+
+									<!-- ======================================================= -->
+									<!-- ESPACIO RESERVADO PARA EL DOCUMENTO PDF -->
+									<!-- ======================================================= -->
+									<section>
+										<h3 class="major">5. Informe Pericial Completo (PDF)</h3>
+										<p>Consulta o descarga el reporte técnico completo con las capturas de pantalla comprobables, hashes MD5 y desarrollo detallado de las Partes I y II[cite: 3]:</p>
+
+										<!-- [INICIO ESPACIO PDF] -->
+										<div class="box" style="border: 1px dashed #ffffff55; padding: 20px; text-align: center; background: rgba(255, 255, 255, 0.03);">
+											<h4>Visualizador del Informe Pericial (PR03)</h4>
+											
+											<!-- Embed / Viewer para el PDF -->
+											<div style="width: 100%; height: 500px; background: #222; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+												<!-- REEMPLAZAR EL SRC CON LA RUTA DE TU ARCHIVO PDF (Ej: src="documentos/PR03_Operacion_Narcos.pdf") -->
+												<embed src="documentos/PR03_Operacion_Narcos.pdf" type="application/pdf" width="100%" height="100%" />
+											</div>
+
+											<ul class="actions fit">
+												<!-- REEMPLAZAR EL HREF POR LA RUTA REAL DE TU PDF PARA PERMITIR DESCARGA -->
+												<li><a href="documentos/PR03_Operacion_Narcos.pdf" download class="button primary icon solid fa-download">Descargar Informe PR03 en PDF</a></li>
+											</ul>
+										</div>
+										<!-- [FIN ESPACIO PDF] -->
+									</section>
+
+									<!-- 6. REFERENCIAS BIBLIOGRÁFICAS OBLIGATORIAS -->
+									<section>
+										<h3 class="major">6. Referencias Bibliográficas</h3>
+										<ul>
+											<li>
+												Garfinkel, S., Farrell, P., Roussev, V., &amp; Dinolt, G. (2009). <em>Bringing Science to Digital Forensics with Standardized Forensic Corpora</em>[cite: 3]. Digital Forensic Research Workshop (DFRWS), Montreal, Canadá[cite: 3]. Disponible en: <a href="https://simson.net/clips/academic/2009.DFRWS.Corpora.pdf" target="_blank">https://simson.net/clips/academic/2009.DFRWS.Corpora.pdf</a>[cite: 3]
+											</li>
+											<li>
+												Digital Corpora. (2019). <em>2019 Narcos Scenario (Narcos-1 Disk Image)</em> [Conjunto de datos forenses estandarizado][cite: 3]. Digital Corpora Repository.
+											</li>
+										</ul>
+									</section>
+
+								</div>
+							</div>
+
+					</section>
+
+				<!-- Footer -->
+					<section id="footer">
+						<div class="inner">
+							<h2 class="major">Portafolio Académico - UPSLP</h2>
+							<p>Lizeth Infante Martinez | CNO-VI Seguridad Informática | 7mo Semestre.</p>
+							<ul class="copyright">
+								<li>&copy; Lizeth Infante Martinez. Todos los derechos reservados.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+							</ul>
+						</div>
+					</section>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
